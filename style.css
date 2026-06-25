@@ -328,10 +328,10 @@ body {
 }
 .letter-grid .letter-btn {
   aspect-ratio: 1;
-  border: 1px solid rgba(0,255,65,0.12);
+  border: 1px solid rgba(0,255,65,0.25);
   border-radius: 10px;
-  background: rgba(19,26,31,0.5);
-  color: rgba(197,200,198,0.6);
+  background: rgba(19,26,31,0.7);
+  color: #e0e0e0;
   font-size: 18px;
   font-weight: 700;
   font-family: 'JetBrains Mono', monospace;
@@ -350,18 +350,18 @@ body {
   box-shadow: 0 0 15px rgba(0,255,65,0.05);
 }
 .letter-grid .letter-btn.completed {
-  background: rgba(0,255,65,0.08);
+  background: rgba(0,255,65,0.15);
   border-color: #00ff41;
   color: #00ff41;
-  box-shadow: 0 0 12px rgba(0,255,65,0.1);
+  box-shadow: 0 0 15px rgba(0,255,65,0.15);
 }
 .letter-grid .letter-btn.failed {
-  background: rgba(255,72,72,0.08);
+  background: rgba(255,72,72,0.12);
   border-color: #ff4848;
   color: #ff4848;
 }
 .letter-grid .letter-btn.locked {
-  opacity: 0.25;
+  opacity: 0.4;
   cursor: not-allowed;
 }
 .letter-grid .letter-btn .check-mark {
