@@ -98,8 +98,40 @@ const celebration = $('celebration');
 const celebrationMsg = $('celebration-msg');
 const celebrationOk = $('celebration-ok');
 
+function apiFetch(url, options) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 5000);
+  return fetch(url, { ...options, signal: controller.signal }).finally(() => clearTimeout(timer));
+}
+
+function saveLocal() {
+  if (!state.userName) return;
+  try {
+    localStorage.setItem('game_' + state.userName, JSON.stringify({
+      userName: state.userName,
+      completed: state.completed,
+      failed: state.failed,
+      slotContents: state.slotContents,
+    }));
+  } catch (e) {}
+}
+
+function loadLocal(userName) {
+  try {
+    const raw = localStorage.getItem('game_' + userName);
+    if (raw) return JSON.parse(raw);
+  } catch (e) {}
+  return null;
+}
+
+function removeLocal() {
+  if (!state.userName) return;
+  try { localStorage.removeItem('game_' + state.userName); } catch (e) {}
+}
+
 async function saveState() {
   if (!state.userName) return;
+  saveLocal();
   const data = {
     userName: state.userName,
     completed: state.completed,
@@ -107,7 +139,7 @@ async function saveState() {
     slotContents: state.slotContents,
   };
   try {
-    await fetch(`/api/state/${encodeURIComponent(state.userName)}`, {
+    await apiFetch(`/api/state/${encodeURIComponent(state.userName)}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -118,8 +150,17 @@ async function saveState() {
 }
 
 async function loadState(userName) {
+  const local = loadLocal(userName);
+  if (local) {
+    state.userName = local.userName || userName;
+    state.completed = local.completed || {};
+    state.failed = local.failed || {};
+    state.slotContents = local.slotContents || {};
+    return true;
+  }
   try {
-    const res = await fetch(`/api/state/${encodeURIComponent(userName)}`);
+    const res = await apiFetch(`/api/state/${encodeURIComponent(userName)}`);
+    if (!res) return false;
     const json = await res.json();
     if (json.success && json.data) {
       state.userName = json.data.userName || userName;
@@ -136,9 +177,10 @@ async function loadState(userName) {
 }
 
 async function clearState() {
+  removeLocal();
   if (state.userName) {
     try {
-      await fetch(`/api/state/${encodeURIComponent(state.userName)}`, { method: 'DELETE' });
+      await apiFetch(`/api/state/${encodeURIComponent(state.userName)}`, { method: 'DELETE' });
     } catch (e) {
       console.warn('clearState error:', e);
     }
