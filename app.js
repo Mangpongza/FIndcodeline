@@ -728,7 +728,38 @@ async function enterMain() {
   showPage('page-main');
 }
 
+function startMatrix() {
+  const canvas = document.getElementById('matrix-bg');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let w, h, cols, drops;
+
+  function resize() {
+    w = canvas.width = innerWidth;
+    h = canvas.height = innerHeight;
+    cols = Math.floor(w / 14);
+    drops = Array(cols).fill(1);
+  }
+  resize();
+  addEventListener('resize', resize);
+
+  function draw() {
+    ctx.fillStyle = 'rgba(10,14,20,0.05)';
+    ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = '#00ff41';
+    ctx.font = '13px monospace';
+    for (let i = 0; i < drops.length; i++) {
+      const text = Math.random() > 0.5 ? '1' : '0';
+      ctx.fillText(text, i * 14, drops[i] * 14);
+      if (drops[i] * 14 > h && Math.random() > 0.975) drops[i] = 0;
+      drops[i]++;
+    }
+  }
+  setInterval(draw, 50);
+}
+
 async function init() {
+  startMatrix();
   showPage('page-login');
 }
 
