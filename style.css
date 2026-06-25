@@ -479,10 +479,10 @@ body {
 }
 .question-card .option-btn {
   padding: 14px 18px;
-  border: 1px solid rgba(0,255,65,0.1);
+  border: 1px solid rgba(0,255,65,0.2);
   border-radius: 10px;
-  background: rgba(0,255,65,0.02);
-  color: #c5c8c6;
+  background: rgba(0,255,65,0.04);
+  color: #e0e0e0;
   font-size: 15px;
   font-family: 'JetBrains Mono', monospace;
   cursor: pointer;
@@ -491,29 +491,33 @@ body {
   display: flex;
   align-items: center;
   gap: 12px;
+  box-shadow: 0 0 6px rgba(0,255,65,0.05);
 }
 .question-card .option-btn .opt-label {
   width: 28px;
   height: 28px;
   border-radius: 6px;
-  background: rgba(0,255,65,0.06);
+  background: rgba(0,255,65,0.1);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 12px;
   font-weight: 700;
   flex-shrink: 0;
-  color: rgba(0,255,65,0.5);
+  color: rgba(0,255,65,0.7);
   font-family: 'JetBrains Mono', monospace;
 }
 .question-card .option-btn:hover:not(.disabled) {
-  border-color: rgba(0,255,65,0.25);
-  background: rgba(0,255,65,0.05);
+  border-color: rgba(0,255,65,0.4);
+  background: rgba(0,255,65,0.08);
+  box-shadow: 0 0 12px rgba(0,255,65,0.1);
 }
 .question-card .option-btn.selected {
   border-color: #58a6ff;
-  background: rgba(88,166,255,0.08);
+  background: rgba(88,166,255,0.12);
   color: #58a6ff;
+  box-shadow: 0 0 15px rgba(88,166,255,0.15);
+  text-shadow: 0 0 8px rgba(88,166,255,0.3);
 }
 .question-card .option-btn.selected .opt-label {
   background: #58a6ff;
@@ -521,8 +525,10 @@ body {
 }
 .question-card .option-btn.correct {
   border-color: #00ff41;
-  background: rgba(0,255,65,0.1);
+  background: rgba(0,255,65,0.15);
   color: #00ff41;
+  box-shadow: 0 0 20px rgba(0,255,65,0.2);
+  text-shadow: 0 0 10px rgba(0,255,65,0.4);
 }
 .question-card .option-btn.correct .opt-label {
   background: #00ff41;
@@ -530,8 +536,9 @@ body {
 }
 .question-card .option-btn.wrong {
   border-color: #ff4848;
-  background: rgba(255,72,72,0.1);
+  background: rgba(255,72,72,0.15);
   color: #ff4848;
+  box-shadow: 0 0 15px rgba(255,72,72,0.15);
 }
 .question-card .option-btn.wrong .opt-label {
   background: #ff4848;
@@ -574,12 +581,13 @@ body {
   transform: none;
 }
 .submit-area .btn-reset {
-  background: rgba(197,200,198,0.05);
-  color: rgba(197,200,198,0.6);
-  border: 1px solid rgba(197,200,198,0.1);
+  background: rgba(197,200,198,0.08);
+  color: #c5c8c6;
+  border: 1px solid rgba(197,200,198,0.2);
 }
 .submit-area .btn-reset:hover {
-  background: rgba(197,200,198,0.1);
+  background: rgba(197,200,198,0.15);
+  box-shadow: 0 0 12px rgba(197,200,198,0.08);
 }
 .q-result {
   text-align: center;
