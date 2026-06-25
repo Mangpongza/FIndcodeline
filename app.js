@@ -627,20 +627,33 @@ loginBtn.addEventListener('click', async () => {
   if (!name) { showToast('กรุณากรอกชื่อก่อน'); return; }
 
   state.userName = name;
+  let loaded = false;
+
   const local = loadLocal(name);
   if (local) {
     state.completed = local.completed || {};
     state.failed = local.failed || {};
     state.slotContents = local.slotContents || {};
-  } else {
-    state.completed = {};
-    state.failed = {};
-    state.slotContents = {};
+    loaded = true;
   }
 
+  try {
+    const res = await apiFetch(`/api/state/${encodeURIComponent(name)}`);
+    if (res && res.ok) {
+      const json = await res.json();
+      if (json.success && json.data) {
+        state.completed = json.data.completed || {};
+        state.failed = json.data.failed || {};
+        state.slotContents = json.data.slotContents || {};
+        loaded = true;
+      }
+    }
+  } catch (e) {}
+
+  if (!loaded) saveState();
   enterMain();
 
-  loadState(name).then(() => saveState()).catch(() => {});
+  if (loaded) saveState();
 });
 
 nameInput.addEventListener('keydown', (e) => {
