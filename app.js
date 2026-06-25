@@ -12,65 +12,7 @@ const REVEAL_MAP = {
   'G': [8]
 };
 
-const QUESTIONS = {};
-
-function addQ(letter, q, opts, ans) {
-  if (!QUESTIONS[letter]) QUESTIONS[letter] = [];
-  QUESTIONS[letter].push({ q, options: opts, answer: ans });
-}
-
-addQ('S', "พี่รหัสเกิดวันที่เท่าไหร่?", ["1 ม.ค.", "15 พ.ค.", "12 ส.ค.", "25 ธ.ค."], 0);
-addQ('S', "พี่รหัสชอบสัตว์อะไร?", ["แมว", "หมา", "กระต่าย", "ปลา"], 0);
-addQ('C', "พี่รหัสเรียนคณะอะไร?", ["วิศวกรรมศาสตร์", "วิทยาศาสตร์", "ศิลปศาสตร์", "นิเทศศาสตร์"], 1);
-addQ('C', "พี่รหัสสีที่ชอบคือ?", ["แดง", "น้ำเงิน", "เขียว", "ชมพู"], 0);
-addQ('O', "พี่รหัสชอบกินอะไร?", ["ข้าวผัด", "ก๋วยเตี๋ยว", "ส้มตำ", "พิซซ่า"], 2);
-addQ('O', "พี่รหัสงานอดิเรกคือ?", ["อ่านหนังสือ", "เล่นเกม", "ดูหนัง", "ฟังเพลง"], 1);
-addQ('R', "พี่รหัสเรียนปีอะไร?", ["ปี 1", "ปี 2", "ปี 3", "ปี 4"], 2);
-addQ('R', "พี่รหัสอายุเท่าไหร่?", ["19", "20", "21", "22"], 1);
-addQ('P', "พี่รหัสชอบดนตรีแนวไหน?", ["ป๊อป", "ร็อค", "ฮิปฮอป", "แจ๊ส"], 0);
-addQ('P', "พี่รหัสรุ่นอะไร?", ["รุ่น 65", "รุ่น 66", "รุ่น 67", "รุ่น 68"], 2);
-addQ('I', "พี่รหัสชอบวิชาอะไร?", ["คณิต", "ฟิสิกส์", "เคมี", "ชีวะ"], 3);
-addQ('I', "พี่รหัสเป็นคนจังหวัดอะไร?", ["กรุงเทพ", "เชียงใหม่", "ขอนแก่น", "ภูเก็ต"], 0);
-addQ('N', "พี่รหัสชอบเที่ยวที่ไหน?", ["ทะเล", "ภูเขา", "ป่า", "ต่างประเทศ"], 0);
-addQ('N', "พี่รหัสชอบกีฬาอะไร?", ["ฟุตบอล", "บาสเก็ตบอล", "ว่ายน้ำ", "วิ่ง"], 2);
-addQ('G', "พี่รหัสชอบดูหนังแนวไหน?", ["แอคชั่น", "คอมเมดี้", "สยองขวัญ", "รักโรแมนติก"], 1);
-addQ('G', "พี่รหัสมื้อโปรดคือ?", ["เช้า", "กลางวัน", "เย็น", "ดึก"], 2);
-addQ('A', "พี่รหัสชอบฤดูอะไร?", ["ร้อน", "ฝน", "หนาว", "ไม่ชอบเลย"], 2);
-addQ('A', "พี่รหัสตื่นกี่โมง?", ["6 โมง", "8 โมง", "10 โมง", "เที่ยง"], 0);
-addQ('B', "พี่รหัสชอบผลไม้อะไร?", ["มะม่วง", "แตงโม", "เงาะ", "ทุเรียน"], 1);
-addQ('B', "พี่รหัสดื่มอะไรตอนเช้า?", ["กาแฟ", "ชา", "นม", "น้ำเปล่า"], 0);
-addQ('D', "พี่รหัสชอบใส่เสื้อสีอะไร?", ["ดำ", "ขาว", "เทา", "สีสันสดใส"], 2);
-addQ('D', "พี่รหัสเรียนพิเศษอะไร?", ["พิเศษไม่เรียน", "ภาษา", "ดนตรี", "กีฬา"], 0);
-addQ('E', "พี่รหัสชอบเล่นเกมไหม?", ["ไม่เล่นเลย", "เล่นบางครั้ง", "เล่นบ่อย", "ติดเกม"], 1);
-addQ('E', "พี่รหัสขับรถมาเรียน?", ["ขับ", "นั่งรถเมล์", "รถไฟฟ้า", "มีคนไปส่ง"], 2);
-addQ('F', "พี่รหัสชอบอากาศแบบไหน?", ["ร้อน", "เย็น", "อบอุ่น", "ไม่สน"], 1);
-addQ('F', "พี่รหัสชอบออกกำลังกายไหม?", ["ไม่ชอบ", "ชอบบ้าง", "ชอบมาก", "ทุกวัน"], 2);
-addQ('H', "พี่รหัสชอบเพลงภาษาไหน?", ["ไทย", "สากล", "ญี่ปุ่น", "เกาหลี"], 0);
-addQ('H', "พี่รหัสเล่นดนตรีได้ไหม?", ["ไม่ได้", "ได้นิดหน่อย", "ได้ดี", "เป็นมืออาชีพ"], 1);
-addQ('J', "พี่รหัสชอบคาแรกเตอร์ไหน?", ["การ์ตูน", "ซุปเปอร์ฮีโร่", "อนิเมะ", "ไม่สน"], 2);
-addQ('J', "พี่รหัสสะสมอะไร?", ["ไม่สะสม", "สติ๊กเกอร์", "รองเท้า", "ฟิกเกอร์"], 3);
-addQ('K', "พี่รหัสชอบไปเที่ยวกับใคร?", ["เพื่อน", "แฟน", "ครอบครัว", "คนเดียว"], 0);
-addQ('K', "พี่รหัสชอบคาราโอเกะไหม?", ["ไม่ชอบ", "ชอบบ้าง", "ชอบมาก", "ไม่เคยลอง"], 1);
-addQ('L', "พี่รหัสชอบดูซีรี่ส์ไหม?", ["ไม่ดู", "ดูบ้าง", "ดูบ่อย", "มาราธอน"], 2);
-addQ('L', "พี่รหัสชอบหมาแมว?", ["หมา", "แมว", "ทั้งคู่", "ไม่ชอบ"], 1);
-addQ('M', "พี่รหัสเรียนสายอะไร?", ["วิทย์", "ศิลป์", "คณิต", "ภาษา"], 0);
-addQ('M', "พี่รหัสถนัดมืออะไร?", ["ขวา", "ซ้าย", "ทั้งคู่", "ไม่แน่ใจ"], 0);
-addQ('Q', "พี่รหัสชอบเลข?", ["ชอบ", "เฉยๆ", "ไม่ชอบ", "เกลียด"], 1);
-addQ('Q', "พี่รหัสชอบปริศนา?", ["ชอบ", "ไม่ชอบ", "เฉยๆ", "ไม่แน่ใจ"], 0);
-addQ('T', "พี่รหัสมักจะนอนกี่ทุ่ม?", ["3 ทุ่ม", "4 ทุ่ม", "5 ทุ่ม", "เที่ยงคืน"], 1);
-addQ('T', "พี่รหัสเป็นคนสาย?", ["ไม่สาย", "บ้างบางครั้ง", "สายบ่อย", "สายตลอด"], 2);
-addQ('U', "พี่รหัสชอบอาหารคาวหรือหวาน?", ["คาว", "หวาน", "ทั้งคู่", "ไม่ชอบกิน"], 1);
-addQ('U', "พี่รหัสชอบทะเลหรือภูเขา?", ["ทะเล", "ภูเขา", "ทั้งคู่", "ไม่ชอบ"], 0);
-addQ('V', "พี่รหัสชอบภาษาไทย?", ["ชอบมาก", "ชอบ", "เฉยๆ", "ไม่ชอบ"], 1);
-addQ('V', "พี่รหัสอยากไปต่างประเทศ?", ["อยากไป", "ไม่อยาก", "ไปแล้ว", "ไม่สน"], 0);
-addQ('W', "พี่รหัสชอบน้องหมา?", ["รักมาก", "ชอบ", "เฉยๆ", "ไม่ชอบ"], 0);
-addQ('W', "พี่รหัสมีสัตว์เลี้ยง?", ["มีแมว", "มีหมา", "มีทั้งคู่", "ไม่มี"], 3);
-addQ('X', "พี่รหัสชอบเทศกาลอะไรมากที่สุด?", ["สงกรานต์", "ปีใหม่", "ลอยกระทง", "คริสต์มาส"], 2);
-addQ('X', "พี่รหัสชอบทำอาหาร?", ["ชอบ", "ไม่ชอบ", "พอได้", "เก่งมาก"], 2);
-addQ('Y', "พี่รหัสชอบสีห้อง?", ["สว่าง", "มืด", "สีสัน", "ไม่สน"], 0);
-addQ('Y', "พี่รหัสชอบอ่านการ์ตูน?", ["อ่าน", "ไม่อ่าน", "บางเรื่อง", "สะสม"], 1);
-addQ('Z', "พี่รหัสชอบโซเชียลมีเดียไหน?", ["IG", "TikTok", "FB", "X"], 1);
-addQ('Z', "พี่รหัสเล่นเกมอะไร?", ["ไม่เล่น", "Rov", "Valorant", "Among Us"], 2);
+let QUESTIONS = {};
 
 const state = {
   userName: '',
@@ -478,8 +420,8 @@ function renderLetterGrid() {
       btn.appendChild(mark);
     }
 
-    btn.addEventListener('click', () => {
-      openQuestionPage(letter);
+    btn.addEventListener('click', async () => {
+      await openQuestionPage(letter);
     });
 
     letterGrid.appendChild(btn);
@@ -491,12 +433,19 @@ let currentAnswers = {};
 let currentSubmitted = {};
 let currentCorrect = {};
 
-function openQuestionPage(letter) {
-  const questions = QUESTIONS[letter];
-  if (!questions || questions.length === 0) {
+async function openQuestionPage(letter) {
+  const res = await apiFetch(`/api/questions/${letter}`);
+  if (!res || !res.ok) {
     showToast('ยังไม่มีโจทย์สำหรับตัวอักษรนี้', 1500);
     return;
   }
+  const json = await res.json();
+  if (!json.success || !json.questions || json.questions.length === 0) {
+    showToast('ยังไม่มีโจทย์สำหรับตัวอักษรนี้', 1500);
+    return;
+  }
+  QUESTIONS[letter] = json.questions;
+  const questions = QUESTIONS[letter];
 
   currentQuestionLetter = letter;
   currentAnswers = {};
@@ -565,68 +514,80 @@ function openQuestionPage(letter) {
   showPage('page-question');
 }
 
-function checkQuestions() {
+async function checkQuestions() {
   const questions = QUESTIONS[currentQuestionLetter];
-  let allCorrect = true;
+  if (!questions) return;
 
-  questions.forEach((q, idx) => {
-    if (currentSubmitted[idx]) return;
-
+  for (let idx = 0; idx < questions.length; idx++) {
+    if (currentSubmitted[idx]) continue;
     const selected = currentAnswers[idx];
     if (selected === undefined) {
       const resultEl = $(`q-result-${idx}`);
       resultEl.textContent = 'กรุณาเลือกคำตอบก่อน';
       resultEl.className = 'q-result show fail';
-      allCorrect = false;
       return;
     }
-
     currentSubmitted[idx] = true;
-    const correct = selected === q.answer;
-    currentCorrect[idx] = correct;
+  }
 
+  const answerList = questions.map((_, i) => currentAnswers[i]);
+  const res = await apiFetch(`/api/check/${currentQuestionLetter}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ answers: answerList }),
+  });
+  if (!res) {
+    showToast('ไม่สามารถตรวจคำตอบได้ ลองอีกครั้ง', 1500);
+    return;
+  }
+  const json = await res.json();
+  if (!json.success || !json.results) {
+    showToast('ไม่สามารถตรวจคำตอบได้ ลองอีกครั้ง', 1500);
+    return;
+  }
+
+  let allCorrect = true;
+  json.results.forEach((correct, idx) => {
+    currentCorrect[idx] = correct;
     const card = $(`q-card-${idx}`);
+    const selected = currentAnswers[idx];
     card.querySelectorAll('.option-btn').forEach(btn => {
       const oi = parseInt(btn.dataset.opt);
       btn.classList.add('disabled');
-      if (oi === q.answer) btn.classList.add('correct');
-      if (oi === selected && oi !== q.answer) btn.classList.add('wrong');
+      if (oi === selected && correct) btn.classList.add('correct');
+      if (oi === selected && !correct) btn.classList.add('wrong');
     });
-
     const resultEl = $(`q-result-${idx}`);
     if (correct) {
       resultEl.textContent = '✓ ถูกต้อง!';
       resultEl.className = 'q-result show success';
     } else {
-      resultEl.textContent = '✗ ผิด! คำตอบที่ถูกต้องคือ ' + q.options[q.answer];
+      resultEl.textContent = '✗ ผิด!';
       resultEl.className = 'q-result show fail';
       allCorrect = false;
     }
   });
 
-  const allSubmitted = questions.every((_, idx) => currentSubmitted[idx]);
-  if (allSubmitted) {
-      if (allCorrect) {
-        state.completed[currentQuestionLetter] = true;
-        delete state.failed[currentQuestionLetter];
-        saveState();
-      renderLetterGrid();
-      renderCodename();
-      celebrationMsg.textContent = `คุณปลดล็อคตัวอักษร ${currentQuestionLetter} สำเร็จ!`;
-      celebration.classList.add('show');
-      $('q-check-btn').disabled = true;
-      $('q-check-btn').textContent = 'ผ่านแล้ว! ✓';
-    } else {
-      state.failed[currentQuestionLetter] = true;
-      delete state.completed[currentQuestionLetter];
-      saveState();
-      renderLetterGrid();
-      renderCodename();
-      $('q-check-btn').disabled = false;
-      $('q-check-btn').textContent = 'ลองใหม่';
-      $('q-check-btn').onclick = resetAndRetry;
-      showToast('✗ ยังไม่ถูกต้อง ลองใหม่!', 2000);
-    }
+  if (allCorrect) {
+    state.completed[currentQuestionLetter] = true;
+    delete state.failed[currentQuestionLetter];
+    saveState();
+    renderLetterGrid();
+    renderCodename();
+    celebrationMsg.textContent = `คุณปลดล็อคตัวอักษร ${currentQuestionLetter} สำเร็จ!`;
+    celebration.classList.add('show');
+    $('q-check-btn').disabled = true;
+    $('q-check-btn').textContent = 'ผ่านแล้ว! ✓';
+  } else {
+    state.failed[currentQuestionLetter] = true;
+    delete state.completed[currentQuestionLetter];
+    saveState();
+    renderLetterGrid();
+    renderCodename();
+    $('q-check-btn').disabled = false;
+    $('q-check-btn').textContent = 'ลองใหม่';
+    $('q-check-btn').onclick = resetAndRetry;
+    showToast('✗ ยังไม่ถูกต้อง ลองใหม่!', 2000);
   }
 }
 

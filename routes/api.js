@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const redis = require('../redis');
+const questions = require('../data/questions');
 
 async function ensureConnected(req, res, next) {
   if (!redis.connected) {
@@ -11,6 +12,21 @@ async function ensureConnected(req, res, next) {
   }
   next();
 }
+
+router.get('/questions/:letter', (req, res) => {
+  const letter = req.params.letter.toUpperCase();
+  const qs = questions.getQuestions(letter);
+  if (!qs) return res.status(404).json({ success: false, error: 'Letter not found' });
+  res.json({ success: true, questions: qs });
+});
+
+router.post('/check/:letter', (req, res) => {
+  const letter = req.params.letter.toUpperCase();
+  const { answers } = req.body;
+  const results = questions.checkAnswers(letter, answers);
+  if (!results) return res.status(400).json({ success: false, error: 'Invalid request' });
+  res.json({ success: true, results });
+});
 
 router.get('/state/:userName', ensureConnected, async (req, res) => {
   try {
