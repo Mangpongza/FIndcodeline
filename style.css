@@ -20,14 +20,11 @@ body {
   display: block;
 }
 
-#page-login {
+#page-login.active {
   display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: column;
-}
-#page-login.active {
-  display: flex;
 }
 .login-box {
   background: rgba(255,255,255,0.05);
