@@ -321,38 +321,43 @@ body {
 }
 
 .guide-box {
-  background: rgba(19,26,31,0.6);
-  border: 1px solid rgba(0,255,65,0.08);
-  border-radius: 10px;
-  padding: 14px 18px;
+  background: rgba(0,255,65,0.06);
+  border: 1px solid rgba(0,255,65,0.2);
+  border-radius: 12px;
+  padding: 16px 20px;
   margin-bottom: 16px;
   font-family: 'JetBrains Mono', monospace;
+  box-shadow: 0 0 15px rgba(0,255,65,0.05), inset 0 0 15px rgba(0,255,65,0.03);
 }
 .guide-box .guide-title {
-  font-size: 12px;
-  color: rgba(0,255,65,0.5);
+  font-size: 13px;
+  color: #00ff41;
   letter-spacing: 2px;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   font-weight: 700;
+  text-shadow: 0 0 10px rgba(0,255,65,0.2);
 }
 .guide-box .guide-step {
-  font-size: 12px;
-  color: rgba(197,200,198,0.55);
-  line-height: 1.8;
+  font-size: 13px;
+  color: rgba(197,200,198,0.75);
+  line-height: 2;
   padding-left: 4px;
+}
+.guide-box .guide-step strong {
+  color: #00ff41;
 }
 .guide-box .slot-example {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 24px;
-  border: 1px dashed rgba(0,255,65,0.3);
+  width: 24px;
+  height: 26px;
+  border: 1px dashed rgba(0,255,65,0.4);
   border-radius: 4px;
-  font-size: 12px;
-  color: rgba(0,255,65,0.4);
+  font-size: 13px;
+  color: rgba(0,255,65,0.5);
   vertical-align: middle;
-  margin: 0 2px;
+  margin: 0 3px;
 }
 
 .letter-grid {
