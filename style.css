@@ -584,10 +584,12 @@ body {
   background: rgba(197,200,198,0.08);
   color: #c5c8c6;
   border: 1px solid rgba(197,200,198,0.2);
+  box-shadow: 0 0 8px rgba(197,200,198,0.06), inset 0 0 8px rgba(197,200,198,0.03);
 }
 .submit-area .btn-reset:hover {
   background: rgba(197,200,198,0.15);
-  box-shadow: 0 0 12px rgba(197,200,198,0.08);
+  border-color: rgba(197,200,198,0.35);
+  box-shadow: 0 0 18px rgba(197,200,198,0.12), inset 0 0 10px rgba(197,200,198,0.05);
 }
 .q-result {
   text-align: center;
