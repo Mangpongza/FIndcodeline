@@ -492,15 +492,8 @@ async function openQuestionPage(letter) {
   `;
   qContainer.appendChild(submitArea);
 
-  const newCheck = $('q-check-btn').cloneNode(true);
-  $('q-check-btn').parentNode.replaceChild(newCheck, $('q-check-btn'));
-  newCheck.id = 'q-check-btn';
-  newCheck.addEventListener('click', checkQuestions);
-
-  const newReset = $('q-reset-btn').cloneNode(true);
-  $('q-reset-btn').parentNode.replaceChild(newReset, $('q-reset-btn'));
-  newReset.id = 'q-reset-btn';
-  newReset.addEventListener('click', resetQuestions);
+  $('q-check-btn').onclick = checkQuestions;
+  $('q-reset-btn').onclick = resetQuestions;
 
   showPage('page-question');
 }
