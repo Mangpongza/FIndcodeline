@@ -110,14 +110,6 @@ async function loadState(userName) {
 }
 
 async function clearState() {
-  removeLocal();
-  if (state.userName) {
-    try {
-      await apiFetch(`/api/state/${encodeURIComponent(state.userName)}`, { method: 'DELETE' });
-    } catch (e) {
-      console.warn('clearState error:', e);
-    }
-  }
   state.userName = '';
   state.completed = {};
   state.failed = {};
