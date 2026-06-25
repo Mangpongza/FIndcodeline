@@ -171,13 +171,13 @@ body {
 
 .welcome-name {
   text-align: center;
-  font-size: 32px;
+  font-size: 48px;
   font-weight: 800;
-  margin: 40px 0 24px;
+  margin: 48px 0 32px;
   color: #00ff41;
-  text-shadow: 0 0 40px rgba(0,255,65,0.4);
+  text-shadow: 0 0 50px rgba(0,255,65,0.5);
   font-family: 'JetBrains Mono', monospace;
-  letter-spacing: 3px;
+  letter-spacing: 4px;
 }
 
 .codename-section {

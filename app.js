@@ -669,7 +669,7 @@ celebrationOk.addEventListener('click', () => {
 
 async function enterMain() {
   displayName.textContent = state.userName;
-  $('welcome-name').textContent = state.userName;
+  $('welcome-name').textContent = 'น้อง' + state.userName;
   renderCodename();
   renderLetterGrid();
   showPage('page-main');
