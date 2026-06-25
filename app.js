@@ -676,20 +676,25 @@ function resetQuestions() {
   renderLetterGrid();
 }
 
-loginBtn.addEventListener('click', async () => {
+loginBtn.addEventListener('click', () => {
   const name = nameInput.value.trim();
   if (!name) { showToast('กรุณากรอกชื่อก่อน'); return; }
 
-  const exists = await loadState(name);
-  if (!exists) {
-    state.userName = name;
+  state.userName = name;
+  const local = loadLocal(name);
+  if (local) {
+    state.completed = local.completed || {};
+    state.failed = local.failed || {};
+    state.slotContents = local.slotContents || {};
+  } else {
     state.completed = {};
     state.failed = {};
     state.slotContents = {};
-    await saveState();
   }
 
-  await enterMain();
+  enterMain();
+
+  loadState(name).then(() => saveState()).catch(() => {});
 });
 
 nameInput.addEventListener('keydown', (e) => {
