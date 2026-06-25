@@ -3,7 +3,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const redis = require('./services/redis');
+const redis = require('./redis');
 const apiRoutes = require('./routes/api');
 
 const app = express();
@@ -27,3 +27,5 @@ async function start() {
 }
 
 start();
+
+module.exports = app;
