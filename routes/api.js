@@ -13,6 +13,17 @@ async function ensureConnected(req, res, next) {
   next();
 }
 
+router.get('/config', (req, res) => {
+  res.json({
+    success: true,
+    codename: 'scorpiong_',
+    revealedChars: ['_'],
+    revealMap: {
+      S: [0], C: [1], O: [2, 6], R: [3], P: [4], I: [5], N: [7], G: [8]
+    }
+  });
+});
+
 router.get('/questions/:letter', (req, res) => {
   const letter = req.params.letter.toUpperCase();
   const qs = questions.getQuestions(letter);

@@ -1,16 +1,7 @@
-const CODENAME = "scorpiong_";
-const REVEALED_CHARS = new Set(['_']);
-
-const REVEAL_MAP = {
-  'S': [0],
-  'C': [1],
-  'O': [2, 6],
-  'R': [3],
-  'P': [4],
-  'I': [5],
-  'N': [7],
-  'G': [8]
-};
+let CODENAME = '';
+let REVEALED_CHARS = new Set();
+let REVEAL_MAP = {};
+let configReady = false;
 
 let QUESTIONS = {};
 
@@ -637,7 +628,8 @@ function resetQuestions() {
   renderLetterGrid();
 }
 
-loginBtn.addEventListener('click', () => {
+loginBtn.addEventListener('click', async () => {
+  if (!configReady) await new Promise(r => { const t = setInterval(() => { if (configReady) { clearInterval(t); r(); } }, 50); });
   const name = nameInput.value.trim();
   if (!name) { showToast('กรุณากรอกชื่อก่อน'); return; }
 
@@ -720,6 +712,18 @@ function startMatrix() {
 }
 
 async function init() {
+  try {
+    const res = await apiFetch('/api/config');
+    if (res) {
+      const json = await res.json();
+      if (json.success) {
+        CODENAME = json.codename;
+        REVEALED_CHARS = new Set(json.revealedChars);
+        REVEAL_MAP = json.revealMap;
+      }
+    }
+  } catch (e) {}
+  configReady = true;
   startMatrix();
   showPage('page-login');
 }
