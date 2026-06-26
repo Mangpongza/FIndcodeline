@@ -21,6 +21,14 @@ app.use('/api', (req, res, next) => {
 });
 app.use('/api', apiRoutes);
 
+app.use((req, res) => {
+  if (req.path.startsWith('/api/')) {
+    res.status(404).json({ success: false, error: 'Not found' });
+  } else {
+    res.status(404).sendFile(path.join(__dirname, '404.html'));
+  }
+});
+
 async function start() {
   const redisConnected = await redis.connect();
   if (!redisConnected) {

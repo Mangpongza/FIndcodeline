@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>404 - ไม่พบหน้า</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap');
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Noto Sans Thai', 'JetBrains Mono', sans-serif;
+  background: #0a0e14;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #c5c8c6;
+}
+.box {
+  background: rgba(12,18,22,0.97);
+  border: 1px solid rgba(0,255,65,0.2);
+  border-radius: 16px;
+  padding: 48px 40px 36px;
+  width: 100%;
+  max-width: 420px;
+  text-align: center;
+  box-shadow: 0 0 40px rgba(0,255,65,0.06), 0 0 80px rgba(0,255,65,0.03);
+  animation: borderPulse 3s ease-in-out infinite;
+}
+@keyframes borderPulse {
+  0%, 100% { border-color: rgba(0,255,65,0.2); box-shadow: 0 0 40px rgba(0,255,65,0.06); }
+  50% { border-color: rgba(0,255,65,0.4); box-shadow: 0 0 60px rgba(0,255,65,0.12); }
+}
+.error-code {
+  font-size: 72px;
+  font-weight: 800;
+  color: #00ff41;
+  text-shadow: 0 0 30px rgba(0,255,65,0.3);
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 6px;
+  margin-bottom: 4px;
+}
+.scanline {
+  width: 60px;
+  height: 2px;
+  background: #00ff41;
+  margin: 12px auto 16px;
+  box-shadow: 0 0 10px rgba(0,255,65,0.5);
+}
+.msg {
+  color: rgba(0,255,65,0.6);
+  font-size: 14px;
+  line-height: 1.8;
+  margin-bottom: 28px;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 1px;
+}
+.btn {
+  display: inline-block;
+  padding: 12px 32px;
+  color: #00ff41;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 3px;
+  border: 1px solid #00ff41;
+  border-radius: 10px;
+  text-decoration: none;
+  transition: all 0.25s;
+}
+.btn:hover {
+  background: rgba(0,255,65,0.06);
+  box-shadow: 0 0 25px rgba(0,255,65,0.1);
+}
+.cursor {
+  display: inline-block;
+  color: #00ff41;
+  animation: blink 1s step-end infinite;
+  margin-left: 4px;
+}
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+</style>
+</head>
+<body>
+<div class="box">
+  <div class="error-code">404</div>
+  <div class="scanline"></div>
+  <div class="msg">
+    ERROR: PAGE NOT FOUND<br>
+    เส้นทางนี้ไม่มีอะไรเลยนอกจากความว่างเปล่า<span class="cursor">_</span>
+  </div>
+  <a class="btn" href="/">กลับไปหน้าแรก</a>
+</div>
+</body>
+</html>

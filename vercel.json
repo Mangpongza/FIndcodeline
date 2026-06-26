@@ -7,6 +7,10 @@
       "use": "@vercel/node"
     },
     {
+      "src": "404.html",
+      "use": "@vercel/static"
+    },
+    {
       "src": "*.{html,css}",
       "use": "@vercel/static"
     },
