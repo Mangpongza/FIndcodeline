@@ -15,11 +15,15 @@
       "use": "@vercel/static"
     },
     {
-      "src": "app.js",
+      "src": "js/app.js",
       "use": "@vercel/static"
     }
   ],
   "routes": [
+    {
+      "src": "/app.js$",
+      "dest": "/404.html"
+    },
     {
       "src": "/api/(.*)",
       "dest": "api/index.js"
