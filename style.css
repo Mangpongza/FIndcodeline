@@ -39,89 +39,204 @@ body {
   flex-direction: column;
 }
 .login-box {
-  background: rgba(19,26,31,0.95);
+  background: rgba(12,18,22,0.97);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(0,255,65,0.15);
+  border: 1px solid rgba(0,255,65,0.2);
   border-radius: 16px;
-  padding: 48px 40px;
+  padding: 48px 40px 36px;
   width: 100%;
   max-width: 420px;
   text-align: center;
-  box-shadow: 0 0 30px rgba(0,255,65,0.05), inset 0 0 30px rgba(0,255,65,0.02);
+  box-shadow: 0 0 40px rgba(0,255,65,0.06), inset 0 0 40px rgba(0,255,65,0.02), 0 0 80px rgba(0,255,65,0.03);
   position: relative;
   overflow: hidden;
+  animation: borderPulse 3s ease-in-out infinite;
 }
-.login-box::before {
-  content: '';
+@keyframes borderPulse {
+  0%, 100% { border-color: rgba(0,255,65,0.2); box-shadow: 0 0 40px rgba(0,255,65,0.06); }
+  50% { border-color: rgba(0,255,65,0.4); box-shadow: 0 0 60px rgba(0,255,65,0.12); }
+}
+.scanline {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   height: 2px;
   background: linear-gradient(90deg, transparent, #00ff41, transparent);
+  animation: scanMove 3s ease-in-out infinite;
 }
+@keyframes scanMove {
+  0% { transform: translateX(-100%); }
+  50% { transform: translateX(100%); }
+  100% { transform: translateX(200%); }
+}
+.corner {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border-color: #00ff41;
+  border-style: solid;
+}
+.corner-tl { top: -1px; left: -1px; border-width: 2px 0 0 2px; border-radius: 16px 0 0 0; }
+.corner-tr { top: -1px; right: -1px; border-width: 2px 2px 0 0; border-radius: 0 16px 0 0; }
+.corner-bl { bottom: -1px; left: -1px; border-width: 0 0 2px 2px; border-radius: 0 0 0 16px; }
+.corner-br { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; border-radius: 0 0 16px 0; }
 .login-box .logo {
-  font-size: 48px;
-  margin-bottom: 8px;
-  filter: drop-shadow(0 0 10px rgba(0,255,65,0.3));
+  font-size: 52px;
+  margin-bottom: 4px;
+  filter: drop-shadow(0 0 15px rgba(0,255,65,0.4));
+  animation: float 4s ease-in-out infinite;
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
 }
 .login-box h1 {
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 800;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
   color: #00ff41;
-  text-shadow: 0 0 20px rgba(0,255,65,0.3);
+  text-shadow: 0 0 30px rgba(0,255,65,0.3);
   font-family: 'JetBrains Mono', monospace;
-  letter-spacing: 2px;
+  letter-spacing: 3px;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-.login-box p {
-  color: rgba(197,200,198,0.5);
-  font-size: 13px;
-  margin-bottom: 32px;
+.typing-text::after {
+  content: 'ตามหาพี่รหัส';
+  animation: none;
+}
+.cursor {
+  display: inline-block;
+  color: #00ff41;
+  animation: blink 1s step-end infinite;
+  font-weight: 100;
+  margin-left: 2px;
+}
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+.login-box .subtitle {
+  color: rgba(0,255,65,0.35);
+  font-size: 10px;
+  letter-spacing: 4px;
+  margin-bottom: 28px;
   font-family: 'JetBrains Mono', monospace;
+  text-transform: uppercase;
 }
-.login-box input {
-  width: 100%;
-  padding: 16px 20px;
+.input-group {
+  display: flex;
+  align-items: center;
+  gap: 0;
   border: 2px solid rgba(0,255,65,0.15);
   border-radius: 10px;
-  background: rgba(0,255,65,0.04);
+  background: rgba(0,255,65,0.03);
+  margin-bottom: 16px;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+.input-group:focus-within {
+  border-color: #00ff41;
+  box-shadow: 0 0 20px rgba(0,255,65,0.1), inset 0 0 20px rgba(0,255,65,0.03);
+}
+.input-group .input-prefix {
+  color: rgba(0,255,65,0.3);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 16px;
+  padding-left: 16px;
+  user-select: none;
+}
+.input-group input {
+  flex: 1;
+  padding: 16px 16px 16px 8px;
+  border: none;
+  background: transparent;
   color: #00ff41;
   font-size: 16px;
   font-family: 'JetBrains Mono', monospace;
   outline: none;
-  transition: border-color 0.3s, box-shadow 0.3s;
-  margin-bottom: 16px;
+  letter-spacing: 1px;
 }
-.login-box input::placeholder {
-  color: rgba(0,255,65,0.25);
-}
-.login-box input:focus {
-  border-color: #00ff41;
-  box-shadow: 0 0 15px rgba(0,255,65,0.1);
+.input-group input::placeholder {
+  color: rgba(0,255,65,0.2);
 }
 .login-box button {
   width: 100%;
-  padding: 14px;
+  padding: 0;
   border: none;
   border-radius: 10px;
   background: transparent;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+.login-box button .btn-text {
+  display: block;
+  padding: 14px;
   color: #00ff41;
   font-size: 16px;
   font-weight: 700;
   font-family: 'JetBrains Mono', monospace;
-  cursor: pointer;
-  transition: all 0.2s;
+  letter-spacing: 4px;
   border: 1px solid #00ff41;
-  letter-spacing: 3px;
+  border-radius: 10px;
+  transition: all 0.25s;
+  position: relative;
+  z-index: 1;
+  background: transparent;
 }
-.login-box button:hover {
-  background: rgba(0,255,65,0.1);
-  box-shadow: 0 0 20px rgba(0,255,65,0.15), inset 0 0 20px rgba(0,255,65,0.05);
+.login-box button .btn-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(0,255,65,0.08);
+  transform: translate(-50%, -50%);
+  transition: width 0.4s, height 0.4s;
+  pointer-events: none;
+}
+.login-box button:hover .btn-text {
+  background: rgba(0,255,65,0.06);
+  box-shadow: 0 0 25px rgba(0,255,65,0.1), inset 0 0 25px rgba(0,255,65,0.03);
   transform: translateY(-2px);
 }
-.login-box button:active {
+.login-box button:hover .btn-glow {
+  width: 300px;
+  height: 80px;
+}
+.login-box button:active .btn-text {
   transform: translateY(0);
+}
+.status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 20px;
+  opacity: 0.5;
+}
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #00ff41;
+  animation: dotPulse 2s ease-in-out infinite;
+}
+@keyframes dotPulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 4px #00ff41; }
+  50% { opacity: 0.3; box-shadow: none; }
+}
+.status-text {
+  color: rgba(0,255,65,0.4);
+  font-size: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 2px;
 }
 
 .header {

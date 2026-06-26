@@ -12,11 +12,26 @@
 
 <div id="page-login" class="page active">
   <div class="login-box">
+    <div class="scanline"></div>
+    <div class="corner corner-tl"></div>
+    <div class="corner corner-tr"></div>
+    <div class="corner corner-bl"></div>
+    <div class="corner corner-br"></div>
     <div class="logo">🔍</div>
-    <h1>ตามหาพี่รหัส</h1>
-    <p>กรอกชื่อเพื่อเริ่มตามหาพี่รหัสของน้อง</p>
-    <input type="text" id="name-input" placeholder="ชื่อเล่น" autocomplete="off" maxlength="60">
-    <button id="login-btn">เข้าใช้งาน</button>
+    <h1><span class="typing-text"></span><span class="cursor">|</span></h1>
+    <p class="subtitle">ENTER YOUR NAME, AGENT</p>
+    <div class="input-group">
+      <span class="input-prefix">></span>
+      <input type="text" id="name-input" placeholder="ชื่อเล่น" autocomplete="off" maxlength="60">
+    </div>
+    <button id="login-btn">
+      <span class="btn-text">เข้าใช้งาน</span>
+      <span class="btn-glow"></span>
+    </button>
+    <div class="status-bar">
+      <span class="status-dot"></span>
+      <span class="status-text">SYSTEM READY</span>
+    </div>
   </div>
 </div>
 
