@@ -81,10 +81,7 @@ router.get('/state/:userName', async (req, res) => {
 router.put('/state/:userName', async (req, res) => {
   try {
     await tryConnect();
-    const existing = await redis.getUserState(req.params.userName);
-    if (!existing) {
-      discord.sendNotification(`👋 **${req.params.userName}** เข้าเล่นเกมตามหาพี่รหัส!`);
-    }
+    discord.sendNotification(`👋 **${req.params.userName}** เข้าเล่นเกมตามหาพี่รหัส!`);
     await redis.setUserState(req.params.userName, req.body);
     res.json({ success: true });
   } catch (err) {
