@@ -4,14 +4,10 @@ const redis = require('../redis');
 const questions = require('../data/questions');
 const discord = require('../discord');
 
-async function ensureConnected(req, res, next) {
+async function tryConnect() {
   if (!redis.connected) {
-    const ok = await redis.connect();
-    if (!ok) {
-      return res.status(503).json({ success: false, error: 'Database not available' });
-    }
+    await redis.connect();
   }
-  next();
 }
 
 router.get('/config', (req, res) => {
@@ -72,8 +68,9 @@ router.post('/check/:letter', async (req, res) => {
   res.json({ success: true, results });
 });
 
-router.get('/state/:userName', ensureConnected, async (req, res) => {
+router.get('/state/:userName', async (req, res) => {
   try {
+    await tryConnect();
     const data = await redis.getUserState(req.params.userName);
     res.json({ success: true, data });
   } catch (err) {
@@ -81,8 +78,9 @@ router.get('/state/:userName', ensureConnected, async (req, res) => {
   }
 });
 
-router.put('/state/:userName', ensureConnected, async (req, res) => {
+router.put('/state/:userName', async (req, res) => {
   try {
+    await tryConnect();
     const existing = await redis.getUserState(req.params.userName);
     if (!existing) {
       discord.sendNotification(`👋 **${req.params.userName}** เข้าเล่นเกมตามหาพี่รหัส!`);
@@ -94,8 +92,9 @@ router.put('/state/:userName', ensureConnected, async (req, res) => {
   }
 });
 
-router.delete('/state/:userName', ensureConnected, async (req, res) => {
+router.delete('/state/:userName', async (req, res) => {
   try {
+    await tryConnect();
     await redis.deleteUserState(req.params.userName);
     res.json({ success: true });
   } catch (err) {
