@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const redis = require('../redis');
 const questions = require('../data/questions');
+const discord = require('../discord');
 
 async function ensureConnected(req, res, next) {
   if (!redis.connected) {
@@ -58,6 +59,14 @@ router.post('/check/:letter', async (req, res) => {
       return res.json({ success: false, error: 'วันนี้คุณทำโจทย์ครบ 1 ข้อแล้ว กลับมาทำใหม่พรุ่งนี้!', dailyLimit: true });
     }
     await redis.setDailyLimit(userName, getToday());
+
+    const userState = await redis.getUserState(userName) || {};
+    const completed = Object.keys(userState.completed || {}).length + 1;
+    discord.sendNotification(`🎉 **${userName}** ปลดล็อคตัวอักษร **${letter}** สำเร็จ! (ข้อที่ ${completed})`);
+
+    if (completed >= 8) {
+      discord.sendNotification(`🏆 **${userName}** ตามหาพี่รหัสเจอแล้ว! คำใบ้คือ **scorpiong_** 🎊`);
+    }
   }
 
   res.json({ success: true, results });
@@ -74,6 +83,10 @@ router.get('/state/:userName', ensureConnected, async (req, res) => {
 
 router.put('/state/:userName', ensureConnected, async (req, res) => {
   try {
+    const existing = await redis.getUserState(req.params.userName);
+    if (!existing) {
+      discord.sendNotification(`👋 **${req.params.userName}** เข้าเล่นเกมตามหาพี่รหัส!`);
+    }
     await redis.setUserState(req.params.userName, req.body);
     res.json({ success: true });
   } catch (err) {
