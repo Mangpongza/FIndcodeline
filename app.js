@@ -5,6 +5,18 @@ let configReady = false;
 
 let QUESTIONS = {};
 
+const RICK = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
+(function() {
+  let detected = false;
+  function rickroll() { if (!detected) { detected = true; location.href = RICK; } }
+  const check = () => { if (window.outerWidth - window.innerWidth > 160 || window.outerHeight - window.innerHeight > 160) rickroll(); };
+  check();
+  setInterval(check, 1000);
+  const img = new Image();
+  Object.defineProperty(img, 'id', { get: rickroll });
+  setInterval(() => { console.clear(); console.log(img); }, 500);
+})();
+
 const state = {
   userName: '',
   completed: {},
