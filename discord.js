@@ -5,9 +5,8 @@ const WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL || 'https://discord.com/api/
 
 function now() {
   const d = new Date();
-  const h = String(d.getHours()).padStart(2, '0');
-  const m = String(d.getMinutes()).padStart(2, '0');
-  return `${h}:${m}`;
+  const opts = { timeZone: 'Asia/Bangkok', hour: '2-digit', minute: '2-digit', hour12: false };
+  return d.toLocaleTimeString('th-TH', opts);
 }
 
 function sendNotification(content) {
