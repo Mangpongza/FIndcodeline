@@ -510,13 +510,19 @@ async function checkQuestions() {
   const res = await apiFetch(`/api/check/${currentQuestionLetter}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ answers: answerList }),
+    body: JSON.stringify({ answers: answerList, userName: state.userName }),
   });
   if (!res) {
     showToast('ไม่สามารถตรวจคำตอบได้ ลองอีกครั้ง', 1500);
     return;
   }
   const json = await res.json();
+  if (json.dailyLimit) {
+    showToast(json.error || 'วันนี้คุณทำโจทย์ครบ 1 ข้อแล้ว!', 3000);
+    $('q-check-btn').disabled = true;
+    $('q-check-btn').textContent = 'หมดวันนี้';
+    return;
+  }
   if (!json.success || !json.results) {
     showToast('ไม่สามารถตรวจคำตอบได้ ลองอีกครั้ง', 1500);
     return;

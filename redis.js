@@ -90,4 +90,25 @@ async function deleteUserState(userName) {
   }
 }
 
-module.exports = { connect, getUserState, setUserState, deleteUserState };
+async function getDailyLimit(userName) {
+  const client = getClient();
+  if (!client || !connected) return null;
+  try {
+    return await client.get(`daily:${userName}`);
+  } catch (err) {
+    return null;
+  }
+}
+
+async function setDailyLimit(userName, date) {
+  const client = getClient();
+  if (!client || !connected) return false;
+  try {
+    await client.set(`daily:${userName}`, date, 'EX', 86400 * 2);
+    return true;
+  } catch (err) {
+    return false;
+  }
+}
+
+module.exports = { connect, getUserState, setUserState, deleteUserState, getDailyLimit, setDailyLimit };

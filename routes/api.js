@@ -31,11 +31,26 @@ router.get('/questions/:letter', (req, res) => {
   res.json({ success: true, questions: qs });
 });
 
-router.post('/check/:letter', (req, res) => {
+function getToday() {
+  return new Date().toISOString().split('T')[0];
+}
+
+router.post('/check/:letter', async (req, res) => {
   const letter = req.params.letter.toUpperCase();
-  const { answers } = req.body;
+  const { answers, userName } = req.body;
   const results = questions.checkAnswers(letter, answers);
   if (!results) return res.status(400).json({ success: false, error: 'Invalid request' });
+
+  const allCorrect = results.every(r => r);
+
+  if (allCorrect && userName) {
+    const dailyDate = await redis.getDailyLimit(userName);
+    if (dailyDate === getToday()) {
+      return res.json({ success: false, error: 'วันนี้คุณทำโจทย์ครบ 1 ข้อแล้ว กลับมาทำใหม่พรุ่งนี้!', dailyLimit: true });
+    }
+    await redis.setDailyLimit(userName, getToday());
+  }
+
   res.json({ success: true, results });
 });
 
