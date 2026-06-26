@@ -5,6 +5,22 @@ let configReady = false;
 
 let QUESTIONS = {};
 
+const _console = {};
+['log', 'warn', 'error'].forEach(m => { _console[m] = window.console[m]; });
+['log', 'info', 'warn', 'error', 'debug', 'table', 'dir', 'dirxml', 'group', 'groupEnd', 'clear', 'count', 'assert', 'profile', 'profileEnd', 'time', 'timeEnd', 'trace'].forEach(m => {
+  try { Object.defineProperty(window.console, m, { value: () => {}, writable: false, configurable: false }); } catch (e) {}
+});
+
+window.addEventListener('contextmenu', e => e.preventDefault());
+window.addEventListener('keydown', e => {
+  if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || (e.ctrlKey && e.key === 'U')) e.preventDefault();
+});
+
+(function detectDev() {
+  function check() { if (window.outerWidth - window.innerWidth > 160 || window.outerHeight - window.innerHeight > 160) document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-size:18px;">❌ ปิด DevTools แล้วลองใหม่</div>'; }
+  check(); setInterval(check, 500);
+})();
+
 const state = {
   userName: '',
   completed: {},
@@ -97,7 +113,7 @@ async function saveState() {
       }
     }
   } catch (e) {
-    console.warn('saveState error:', e);
+    _console.warn('saveState error:', e);
   }
 }
 
@@ -123,7 +139,7 @@ async function loadState(userName) {
     }
     return false;
   } catch (e) {
-    console.warn('loadState error:', e);
+    _console.warn('loadState error:', e);
     return false;
   }
 }
