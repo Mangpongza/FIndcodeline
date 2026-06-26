@@ -41,6 +41,9 @@ const toast = $('toast');
 const celebration = $('celebration');
 const celebrationMsg = $('celebration-msg');
 const celebrationOk = $('celebration-ok');
+const letterBody = $('letter-body');
+const letterBtn = $('letter-btn');
+const showLetterLink = $('show-letter-link');
 
 function apiFetch(url, options) {
   const controller = new AbortController();
@@ -706,8 +709,43 @@ async function enterMain() {
   $('welcome-name').textContent = 'น้อง' + state.userName;
   renderCodename();
   renderLetterGrid();
+
+  const completedCount = Object.keys(state.completed).length;
+  $('stat-days').textContent = completedCount;
+  $('stat-quiz').textContent = completedCount;
+  $('stat-letters').textContent = CODENAME.length;
+  letterBody.textContent = `สวัสดีน้อง${state.userName} 💌\n\nพี่รหัสของเราอยู่ในปริศนานี้แล้ว\n\nค่อย ๆ ทำโจทย์วันละนิด\nสะสมตัวอักษร\nแล้วมาเปิดชื่อพี่ให้ครบกันนะ\n\n— พี่รหัส`;
   showPage('page-main');
+  const pageLetter = document.getElementById('page-letter');
+  if (pageLetter) {
+    pageLetter.style.display = 'flex';
+    document.querySelector('.header').style.display = 'none';
+    document.querySelector('.welcome-name').style.display = 'none';
+    document.querySelector('.codename-section').style.display = 'none';
+    document.querySelector('.guide-box').style.display = 'none';
+    document.querySelector('.letter-grid').style.display = 'none';
+  }
 }
+
+letterBtn.addEventListener('click', () => {
+  document.getElementById('page-letter').style.display = 'none';
+  document.querySelector('.header').style.display = '';
+  document.querySelector('.welcome-name').style.display = '';
+  document.querySelector('.codename-section').style.display = '';
+  document.querySelector('.guide-box').style.display = '';
+  document.querySelector('.letter-grid').style.display = '';
+});
+
+showLetterLink.addEventListener('click', () => {
+  showPage('page-main');
+  document.getElementById('page-letter').style.display = 'flex';
+  document.querySelector('.header').style.display = 'none';
+  document.querySelector('.welcome-name').style.display = 'none';
+  document.querySelector('.codename-section').style.display = 'none';
+  document.querySelector('.guide-box').style.display = 'none';
+  document.querySelector('.letter-grid').style.display = 'none';
+  nameInput.value = state.userName || '';
+});
 
 function startMatrix() {
   const canvas = document.getElementById('matrix-bg');
@@ -752,7 +790,6 @@ async function init() {
     }
   } catch (e) {}
   configReady = true;
-  startMatrix();
   showPage('page-login');
 }
 
