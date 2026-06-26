@@ -5,43 +5,13 @@ let configReady = false;
 
 let QUESTIONS = {};
 
-// Anti-console & anti-inspect protection
-const _console = {};
-['log', 'warn', 'error', 'info', 'debug'].forEach(m => { _console[m] = window.console[m]; });
-['log', 'info', 'warn', 'error', 'debug', 'table', 'dir', 'dirxml', 'group', 'groupCollapsed', 'groupEnd', 'clear', 'count', 'assert', 'profile', 'profileEnd', 'time', 'timeEnd', 'timeLog', 'trace'].forEach(method => {
-  try { Object.defineProperty(window.console, method, { value: () => {}, writable: false, configurable: false }); } catch (e) {}
-});
-
-window.addEventListener('contextmenu', e => e.preventDefault());
-
-window.addEventListener('keydown', e => {
-  if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || (e.ctrlKey && e.key === 'U')) {
-    e.preventDefault();
-  }
-});
-
-(function detectDevTools() {
-  const threshold = 160;
-  function check() {
-    if (window.outerWidth - window.innerWidth > threshold || window.outerHeight - window.innerHeight > threshold) {
-      document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;color:#333;background:#faf7f2;font-size:18px;">❌ ปิด DevTools แล้วลองใหม่อีกครั้ง</div>';
-    }
-  }
-  check();
-  setInterval(check, 500);
-})();
-
-(function() {
-'use strict';
-
-let CODENAME = '';
-let REVEALED_CHARS = new Set();
-let REVEAL_MAP = {};
-let configReady = false;
-
-let QUESTIONS = {};
-
-const state = { userName: '', completed: {}, failed: {}, slotContents: {}, clientToken: '' };
+const state = {
+  userName: '',
+  completed: {},
+  failed: {},
+  slotContents: {},
+  clientToken: '',
+};
 
 function getOrCreateToken(name) {
   const key = 'token_' + name;
@@ -127,7 +97,7 @@ async function saveState() {
       }
     }
   } catch (e) {
-    _console.warn('saveState error:', e);
+    console.warn('saveState error:', e);
   }
 }
 
@@ -787,5 +757,3 @@ async function init() {
 }
 
 init();
-
-})();
