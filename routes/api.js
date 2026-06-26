@@ -138,18 +138,16 @@ router.put('/state/:userName', async (req, res) => {
     await tryConnect();
 
     const existing = await redis.getUserState(name);
-    if (existing && existing.clientToken) {
-      const provided = req.body.clientToken;
-      if (!provided || provided !== existing.clientToken) {
-        return res.status(403).json({ success: false, error: 'Forbidden' });
-      }
-    }
-
     const isNew = !existing;
     const body = { ...req.body, userName: name };
 
     if (isNew) {
       body.clientToken = crypto.randomUUID();
+    } else {
+      const provided = req.body.clientToken;
+      if (existing.clientToken && provided !== existing.clientToken) {
+        body.clientToken = crypto.randomUUID();
+      }
     }
 
     discord.sendNotification(`👋 **${name}** เข้าเล่นเกมตามหาพี่รหัส!`);
