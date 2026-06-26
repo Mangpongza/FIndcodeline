@@ -5,57 +5,37 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>ตามหาพี่รหัส</title>
 <link rel="stylesheet" href="style.css">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
 
+<canvas id="matrix-bg"></canvas>
+
 <div id="page-login" class="page active">
-  <div class="cafe-bg"></div>
-  <div class="cafe-container">
-    <div class="cafe-brand">
-      <span class="cafe-logo">☕</span>
-      <h1 class="cafe-title">Dev Café</h1>
-      <p class="cafe-desc">ตอบโจทย์สะสมตัวอักษร<br>แล้วค่อย ๆ เปิดชื่อรุ่นพี่ผ่านด่านรายวัน<br>ในบรรยากาศคาเฟ่เล็ก ๆ</p>
+  <div class="login-box">
+    <div class="scanline"></div>
+    <div class="corner corner-tl"></div>
+    <div class="corner corner-tr"></div>
+    <div class="corner corner-bl"></div>
+    <div class="corner corner-br"></div>
+    <div class="logo">🔍</div>
+    <h1><span class="typing-text"></span><span class="cursor">|</span></h1>
+    <p class="subtitle">ENTER YOUR NAME, AGENT</p>
+    <div class="input-group">
+      <span class="input-prefix">></span>
+      <input type="text" id="name-input" placeholder="ชื่อเล่น" autocomplete="off" maxlength="60">
     </div>
-
-    <div class="cafe-stats">
-      <div class="stat-item">
-        <span class="stat-value" id="stat-days">0</span>
-        <span class="stat-label">Days</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-value" id="stat-quiz">0</span>
-        <span class="stat-label">Quiz</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-value" id="stat-letters">26</span>
-        <span class="stat-label">Letters</span>
-      </div>
-    </div>
-
-    <div class="cafe-how">
-      <div class="how-title">How it works</div>
-      <p class="how-text">ใส่ชื่อของตัวเอง, เล่นโจทย์ทีละวัน, แล้วใช้คำตอบที่สะสมไว้เปิดชื่อให้ครบทั้งบอร์ด</p>
-    </div>
-
-    <div class="cafe-login-box">
-      <div class="cafe-welcome">ยินดีต้อนรับสู่ Dev Café ☕</div>
-      <p class="cafe-login-desc">ใส่ชื่อของน้องก่อน แล้วค่อยไปลุยกัน</p>
-      <input type="text" id="name-input" placeholder="ชื่อของน้อง..." autocomplete="off" maxlength="60">
-      <button id="login-btn">เข้าสู่ Dev Café ☕</button>
-      <div class="cafe-back-link" id="show-letter-link">ย้อนกลับไปอ่านข้อความอีกครั้ง</div>
+    <button id="login-btn">
+      <span class="btn-text">เข้าใช้งาน</span>
+      <span class="btn-glow"></span>
+    </button>
+    <div class="status-bar">
+      <span class="status-dot"></span>
+      <span class="status-text">SYSTEM READY</span>
     </div>
   </div>
 </div>
 
 <div id="page-main" class="page">
-  <div class="page-letter" id="page-letter">
-    <div class="letter-paper">
-      <div class="letter-header">✉️</div>
-      <div class="letter-body" id="letter-body"></div>
-      <button class="letter-btn" id="letter-btn">เริ่มเล่นเลย ☕</button>
-    </div>
-  </div>
   <div class="header">
     <h2>🔍 ตามหาพี่รหัส</h2>
     <div class="user-info">
