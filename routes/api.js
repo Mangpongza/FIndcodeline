@@ -98,10 +98,10 @@ router.post('/check/:letter', async (req, res) => {
 
     const userState = await redis.getUserState(userName) || {};
     const completed = Object.keys(userState.completed || {}).length + 1;
-    discord.sendNotification(`🎉 **${userName}** ปลดล็อคตัวอักษร **${letter}** สำเร็จ! (ข้อที่ ${completed})`);
+    await discord.sendNotification(`🎉 **${userName}** ปลดล็อคตัวอักษร **${letter}** สำเร็จ! (ข้อที่ ${completed})`);
 
     if (completed >= 8) {
-      discord.sendNotification(`🏆 **${userName}** ตามหาพี่รหัสเจอแล้ว! คำใบ้คือ **scorpiong_** 🎊`);
+      await discord.sendNotification(`🏆 **${userName}** ตามหาพี่รหัสเจอแล้ว! คำใบ้คือ **scorpiong_** 🎊`);
     }
   }
 
@@ -150,7 +150,9 @@ router.put('/state/:userName', async (req, res) => {
       }
     }
 
-    discord.sendNotification(`👋 **${name}** เข้าเล่นเกมตามหาพี่รหัส!`);
+    if (body.isLogin) {
+      await discord.sendNotification(`👋 **${name}** เข้าเล่นเกมตามหาพี่รหัส!`);
+    }
     await redis.setUserState(name, body);
     res.json({ success: true, clientToken: body.clientToken, isNew });
   } catch (err) {

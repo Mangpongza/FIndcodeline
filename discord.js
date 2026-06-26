@@ -11,25 +11,37 @@ function now() {
 }
 
 function sendNotification(content) {
-  if (!WEBHOOK_URL) return;
-  try {
-    const url = new URL(WEBHOOK_URL);
-    const data = JSON.stringify({ content: `\`[${now()}]\` ${content}` });
-    const opts = {
-      hostname: url.hostname,
-      path: url.pathname + url.search,
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Content-Length': Buffer.byteLength(data),
-      },
-    };
-    const req = https.request(opts);
-    req.write(data);
-    req.end();
-  } catch (e) {
-    console.error('Discord webhook error:', e.message);
-  }
+  if (!WEBHOOK_URL) return Promise.resolve();
+  return new Promise((resolve) => {
+    try {
+      const url = new URL(WEBHOOK_URL);
+      const data = JSON.stringify({ content: `\`[${now()}]\` ${content}` });
+      const opts = {
+        hostname: url.hostname,
+        path: url.pathname + url.search,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Content-Length': Buffer.byteLength(data),
+        },
+        timeout: 3000,
+      };
+      const req = https.request(opts, (res) => {
+        res.on('data', () => {});
+        res.on('end', resolve);
+      });
+      req.on('error', (e) => {
+        console.error('Discord webhook error:', e.message);
+        resolve();
+      });
+      req.on('timeout', () => { req.destroy(); resolve(); });
+      req.write(data);
+      req.end();
+    } catch (e) {
+      console.error('Discord webhook error:', e.message);
+      resolve();
+    }
+  });
 }
 
 module.exports = { sendNotification };
