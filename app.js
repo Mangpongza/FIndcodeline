@@ -674,8 +674,12 @@ loginBtn.addEventListener('click', async () => {
     saveState();
   }
 
-  enterMain();
+  showPage('page-letter');
   saveState();
+});
+
+$('letter-btn').addEventListener('click', () => {
+  enterMain();
 });
 
 nameInput.addEventListener('keydown', (e) => {
