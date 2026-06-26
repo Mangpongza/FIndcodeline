@@ -10,7 +10,18 @@ const state = {
   completed: {},
   failed: {},
   slotContents: {},
+  clientToken: '',
 };
+
+function getOrCreateToken(name) {
+  const key = 'token_' + name;
+  let t = localStorage.getItem(key);
+  if (!t) {
+    t = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2);
+    localStorage.setItem(key, t);
+  }
+  return t;
+}
 
 const $ = id => document.getElementById(id);
 const pageLogin = $('page-login');
@@ -70,13 +81,21 @@ async function saveState() {
     completed: state.completed,
     failed: state.failed,
     slotContents: state.slotContents,
+    clientToken: state.clientToken,
   };
   try {
-    await apiFetch(`/api/state/${encodeURIComponent(state.userName)}`, {
+    const res = await apiFetch(`/api/state/${encodeURIComponent(state.userName)}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     });
+    if (res && res.ok) {
+      const json = await res.json();
+      if (json.clientToken) {
+        state.clientToken = json.clientToken;
+        localStorage.setItem('token_' + state.userName, json.clientToken);
+      }
+    }
   } catch (e) {
     console.warn('saveState error:', e);
   }
@@ -629,6 +648,7 @@ loginBtn.addEventListener('click', async () => {
   if (!name) { showToast('กรุณากรอกชื่อก่อน'); return; }
 
   state.userName = name;
+  state.clientToken = getOrCreateToken(name);
 
   const local = loadLocal(name);
   if (local) {
@@ -644,6 +664,10 @@ loginBtn.addEventListener('click', async () => {
           state.completed = json.data.completed || {};
           state.failed = json.data.failed || {};
           state.slotContents = json.data.slotContents || {};
+          if (json.data.clientToken) {
+            state.clientToken = json.data.clientToken;
+            localStorage.setItem('token_' + name, json.data.clientToken);
+          }
         }
       }
     } catch (e) {}
