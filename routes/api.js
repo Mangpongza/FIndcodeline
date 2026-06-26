@@ -31,7 +31,7 @@ router.get('/questions/:letter', async (req, res) => {
   if (userName) {
     const dailyDate = await redis.getDailyLimit(userName);
     if (dailyDate === getToday()) {
-      return res.json({ success: false, error: 'วันนี้คุณทำโจทย์ครบ 1 ข้อแล้ว กลับมาทำใหม่พรุ่งนี้!', dailyLimit: true });
+      return res.json({ success: false, error: 'วันนี้น้องทำโจทย์ครบ 1 ข้อแล้ว กลับมาทำใหม่พรุ่งนี้!', dailyLimit: true });
     }
   }
 
