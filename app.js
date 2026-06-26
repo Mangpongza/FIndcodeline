@@ -399,6 +399,7 @@ function renderLetterPool() {
 }
 
 function renderLetterGrid() {
+  updateSidebar();
   letterGrid.innerHTML = '';
   'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(letter => {
     const btn = document.createElement('button');
@@ -701,11 +702,29 @@ celebrationOk.addEventListener('click', () => {
   showPage('page-main');
 });
 
+function updateSidebar() {
+  const done = Object.keys(state.completed).length;
+  const pct = Math.min(100, (done / 8) * 100);
+  const progress = $('sidebar-progress');
+  if (progress) progress.style.width = pct + '%';
+  const stats = $('sidebar-stats');
+  if (stats) stats.textContent = done + ' / 8';
+  const hint = $('sidebar-hint-text');
+  if (!hint) return;
+  const remaining = 8 - done;
+  if (done === 0) hint.textContent = 'เริ่มจากคลิกตัวอักษร A-Z';
+  else if (remaining > 0) hint.textContent = 'เหลืออีก ' + remaining + ' ตัวอักษร!';
+  else hint.textContent = '🎉 เจอพี่รหัสแล้ว! ลากตัวอักษรไปวาง';
+}
+
 async function enterMain() {
   displayName.textContent = state.userName;
   $('welcome-name').textContent = 'น้อง' + state.userName;
+  const greeting = $('sidebar-greeting');
+  if (greeting) greeting.textContent = state.userName;
   renderCodename();
   renderLetterGrid();
+  updateSidebar();
   showPage('page-main');
 }
 
