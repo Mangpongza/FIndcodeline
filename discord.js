@@ -1,4 +1,5 @@
 const https = require('https');
+require('dotenv').config();
 
 const WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
 
