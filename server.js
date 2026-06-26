@@ -13,6 +13,12 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname)));
 
+app.use('/api', (req, res, next) => {
+  if (req.path.includes('..')) {
+    return res.status(400).json({ success: false, error: 'Invalid path' });
+  }
+  next();
+});
 app.use('/api', apiRoutes);
 
 async function start() {
