@@ -24,8 +24,17 @@ router.get('/config', (req, res) => {
   });
 });
 
-router.get('/questions/:letter', (req, res) => {
+router.get('/questions/:letter', async (req, res) => {
   const letter = req.params.letter.toUpperCase();
+  const userName = req.query.userName;
+
+  if (userName) {
+    const dailyDate = await redis.getDailyLimit(userName);
+    if (dailyDate === getToday()) {
+      return res.json({ success: false, error: 'วันนี้คุณทำโจทย์ครบ 1 ข้อแล้ว กลับมาทำใหม่พรุ่งนี้!', dailyLimit: true });
+    }
+  }
+
   const qs = questions.getQuestions(letter);
   if (!qs) return res.status(404).json({ success: false, error: 'Letter not found' });
   res.json({ success: true, questions: qs });

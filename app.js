@@ -417,12 +417,16 @@ let currentSubmitted = {};
 let currentCorrect = {};
 
 async function openQuestionPage(letter) {
-  const res = await apiFetch(`/api/questions/${letter}`);
+  const res = await apiFetch(`/api/questions/${letter}?userName=${encodeURIComponent(state.userName)}`);
   if (!res || !res.ok) {
     showToast('ยังไม่มีโจทย์สำหรับตัวอักษรนี้', 1500);
     return;
   }
   const json = await res.json();
+  if (json.dailyLimit) {
+    showToast(json.error || 'วันนี้ทำครบ 1 ข้อแล้ว!', 3000);
+    return;
+  }
   if (!json.success || !json.questions || json.questions.length === 0) {
     showToast('ยังไม่มีโจทย์สำหรับตัวอักษรนี้', 1500);
     return;
