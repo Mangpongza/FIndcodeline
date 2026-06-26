@@ -9,7 +9,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use('/api', (req, res, next) => {
-  if (req.path.includes('..')) {
+  if (req.originalUrl.includes('..')) {
     return res.status(400).json({ success: false, error: 'Invalid path' });
   }
   next();
