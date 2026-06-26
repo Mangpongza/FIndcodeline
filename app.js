@@ -73,7 +73,7 @@ function removeLocal() {
   try { localStorage.removeItem('game_' + state.userName); } catch (e) {}
 }
 
-async function saveState(isLogin) {
+async function saveState() {
   if (!state.userName) return;
   saveLocal();
   const data = {
@@ -82,7 +82,6 @@ async function saveState(isLogin) {
     failed: state.failed,
     slotContents: state.slotContents,
     clientToken: state.clientToken,
-    isLogin: !!isLogin,
   };
   try {
     const res = await apiFetch(`/api/state/${encodeURIComponent(state.userName)}`, {
@@ -676,7 +675,7 @@ loginBtn.addEventListener('click', async () => {
   }
 
   enterMain();
-  saveState(true);
+  saveState();
 });
 
 nameInput.addEventListener('keydown', (e) => {

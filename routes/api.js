@@ -150,9 +150,7 @@ router.put('/state/:userName', async (req, res) => {
       }
     }
 
-    if (body.isLogin) {
-      await discord.sendNotification(`👋 **${name}** เข้าเล่นเกมตามหาพี่รหัส!`);
-    }
+    await discord.sendNotification(`👋 **${name}** เข้าเล่นเกมตามหาพี่รหัส!`);
     await redis.setUserState(name, body);
     res.json({ success: true, clientToken: body.clientToken, isNew });
   } catch (err) {
