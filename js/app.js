@@ -220,6 +220,15 @@ function initDragTile(el, letter) {
     dragData = null;
   }, { passive: false });
 
+  el.addEventListener('touchcancel', () => {
+    if (!touchClone) return;
+    document.body.removeChild(touchClone);
+    touchClone = null;
+    el.style.opacity = '1';
+    document.querySelectorAll('.codename-slots .slot').forEach(s => s.classList.remove('dragover'));
+    dragData = null;
+  }, { passive: false });
+
   el.addEventListener('click', () => {
     if (el.classList.contains('used')) return;
     const slots = document.querySelectorAll('.codename-slots .slot:not(.revealed):not(.filled)');
@@ -361,7 +370,6 @@ function renderLetterPool() {
   letterPool.innerHTML = '';
 
   const chars = CODENAME.split('');
-  const needed = {};
   chars.forEach((ch, i) => {
     if (REVEALED_CHARS.has(ch)) return;
     ch = ch.toLowerCase();
@@ -374,28 +382,14 @@ function renderLetterPool() {
         break;
       }
     }
-    if (unlocked) {
-      needed[ch] = (needed[ch] || 0) + 1;
-    }
-  });
+    if (!unlocked) return;
 
-  const placedCount = {};
-  Object.values(state.slotContents).forEach(l => {
-    placedCount[l] = (placedCount[l] || 0) + 1;
-  });
-
-  Object.entries(needed).forEach(([letter, count]) => {
-    const alreadyPlaced = placedCount[letter] || 0;
-    const toCreate = count - alreadyPlaced;
-    for (let n = 0; n < toCreate; n++) {
-      const tile = document.createElement('div');
-      tile.className = 'letter-tile available';
-      tile.textContent = letter.toUpperCase();
-      tile.dataset.letter = letter;
-      tile.dataset.uid = letter + '-' + n;
-      initDragTile(tile, letter);
-      letterPool.appendChild(tile);
-    }
+    const tile = document.createElement('div');
+    tile.className = 'letter-tile available';
+    tile.textContent = ch.toUpperCase();
+    tile.dataset.letter = ch;
+    initDragTile(tile, ch);
+    letterPool.appendChild(tile);
   });
 }
 
@@ -527,6 +521,9 @@ async function checkQuestions() {
       resultEl.className = 'q-result show fail';
       return;
     }
+  }
+
+  for (let idx = 0; idx < questions.length; idx++) {
     currentSubmitted[idx] = true;
   }
 
