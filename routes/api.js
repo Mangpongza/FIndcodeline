@@ -131,10 +131,6 @@ router.get('/state/:userName', async (req, res) => {
     if (!data) {
       return res.json({ success: true, data: null });
     }
-    const provided = req.query.clientToken;
-    if (data.clientToken && provided !== data.clientToken) {
-      return res.status(403).json({ success: false, error: 'Forbidden' });
-    }
     const safe = { ...data };
     delete safe.clientToken;
     res.json({ success: true, data: safe });
@@ -169,9 +165,14 @@ router.put('/state/:userName', async (req, res) => {
     } else {
       const provided = req.body.clientToken;
       if (existing.clientToken && provided !== existing.clientToken) {
-        return res.status(403).json({ success: false, error: 'Forbidden' });
+        if (body.isLogin) {
+          body.clientToken = crypto.randomUUID();
+        } else {
+          return res.status(403).json({ success: false, error: 'Forbidden' });
+        }
+      } else {
+        body.clientToken = existing.clientToken;
       }
-      body.clientToken = existing.clientToken;
     }
 
     if (body.isLogin) {
