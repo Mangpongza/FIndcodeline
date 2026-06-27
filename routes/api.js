@@ -72,7 +72,7 @@ router.get('/questions/:letter', async (req, res) => {
 });
 
 function getToday() {
-  return new Date().toISOString().split('T')[0];
+  return new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Bangkok' });
 }
 
 router.post('/check/:letter', async (req, res) => {
