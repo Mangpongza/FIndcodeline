@@ -737,7 +737,7 @@ function startMatrix() {
       drops[i]++;
     }
   }
-  setInterval(draw, 50);
+  setInterval(draw, 120);
 }
 
 async function init() {
