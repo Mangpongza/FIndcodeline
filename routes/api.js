@@ -5,6 +5,11 @@ const redis = require('../redis');
 const questions = require('../data/questions');
 const discord = require('../discord');
 
+// Server-side secrets - NOT exposed to client
+const CODENAME = 'scorpiong_';
+const REVEALED_CHARS = new Set(['_']);
+const REVEAL_MAP = { S: [0], C: [1], O: [2, 6], R: [3], P: [4], I: [5], N: [7], G: [8] };
+
 const MAX_NAME_LEN = 50;
 const MAX_PAYLOAD = 10240;
 
@@ -42,15 +47,127 @@ async function tryConnect() {
   }
 }
 
-router.get('/config', (req, res) => {
-  res.json({
-    success: true,
-    codename: 'scorpiong_',
-    revealedChars: ['_'],
-    revealMap: {
-      S: [0], C: [1], O: [2, 6], R: [3], P: [4], I: [5], N: [7], G: [8]
+router.get('/codename/:userName', async (req, res) => {
+  try {
+    const name = req.params.userName;
+    if (!isValidName(name)) return res.status(400).json({ success: false, error: 'Invalid name' });
+
+    await tryConnect();
+    const userState = await redis.getUserState(name) || {};
+    const completed = userState.completed || {};
+    const serverSlotContents = userState.slotContents || {};
+
+    const slots = CODENAME.split('').map((ch, pos) => {
+      if (REVEALED_CHARS.has(ch)) {
+        return { pos, state: 'revealed', letter: ch };
+      }
+      if (serverSlotContents[pos] !== undefined) {
+        return { pos, state: 'filled', letter: serverSlotContents[pos] };
+      }
+      return { pos, state: 'hidden' };
+    });
+
+    const availableLetters = [];
+    const placedLetters = Object.values(serverSlotContents);
+    for (const [alpha, positions] of Object.entries(REVEAL_MAP)) {
+      if (completed[alpha]) {
+        const letterLower = alpha.toLowerCase();
+        const neededCount = positions.length;
+        const placedCount = placedLetters.filter(l => l === letterLower).length;
+        for (let i = 0; i < neededCount - placedCount; i++) {
+          availableLetters.push(letterLower);
+        }
+      }
     }
-  });
+
+    res.json({ success: true, slots, availableLetters });
+  } catch (err) {
+    console.error('GET codename error:', err);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
+router.post('/place-letter', async (req, res) => {
+  try {
+    const { userName, clientToken, position, letter } = req.body;
+    if (!isValidName(userName)) return res.status(400).json({ success: false, error: 'Invalid name' });
+    if (typeof position !== 'number' || !letter || typeof letter !== 'string' || letter.length !== 1) {
+      return res.status(400).json({ success: false, error: 'Invalid request' });
+    }
+
+    await tryConnect();
+    const userState = await redis.getUserState(userName);
+    if (!userState) return res.status(404).json({ success: false, error: 'User not found' });
+    if (userState.clientToken && clientToken !== userState.clientToken) {
+      return res.status(403).json({ success: false, error: 'Forbidden' });
+    }
+
+    const expectedChar = CODENAME[position];
+    if (!expectedChar) return res.status(400).json({ success: false, error: 'Invalid position' });
+    if (REVEALED_CHARS.has(expectedChar)) {
+      return res.status(400).json({ success: false, error: 'Position is already revealed' });
+    }
+
+    const upperLetter = letter.toUpperCase();
+    const posHistory = REVEAL_MAP[upperLetter];
+    if (!posHistory || !posHistory.includes(position)) {
+      return res.json({ success: true, correct: false });
+    }
+
+    const userCompleted = userState.completed || {};
+    if (!userCompleted[upperLetter]) {
+      return res.json({ success: true, correct: false });
+    }
+
+    const correct = letter.toLowerCase() === expectedChar.toLowerCase();
+
+    if (correct) {
+      const slotContents = { ...(userState.slotContents || {}), [position]: letter.toLowerCase() };
+      userState.slotContents = slotContents;
+      await redis.setUserState(userName, userState);
+
+      const allFilled = CODENAME.split('').every((ch, i) => {
+        if (REVEALED_CHARS.has(ch)) return true;
+        return slotContents[i] !== undefined;
+      });
+
+      if (allFilled) {
+        await discord.sendNotification(`🏆 **${userName}** ตามหาพี่รหัสเจอแล้ว! คำใบ้คือ **${CODENAME}** 🎊`);
+      }
+
+      res.json({ success: true, correct: true, completed: allFilled });
+    } else {
+      res.json({ success: true, correct: false });
+    }
+  } catch (err) {
+    console.error('POST place-letter error:', err);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
+router.post('/remove-letter', async (req, res) => {
+  try {
+    const { userName, clientToken, position } = req.body;
+    if (!isValidName(userName)) return res.status(400).json({ success: false, error: 'Invalid name' });
+    if (typeof position !== 'number') return res.status(400).json({ success: false, error: 'Invalid request' });
+
+    await tryConnect();
+    const userState = await redis.getUserState(userName);
+    if (!userState) return res.status(404).json({ success: false, error: 'User not found' });
+    if (userState.clientToken && clientToken !== userState.clientToken) {
+      return res.status(403).json({ success: false, error: 'Forbidden' });
+    }
+
+    const slotContents = { ...(userState.slotContents || {}) };
+    delete slotContents[position];
+    userState.slotContents = slotContents;
+    await redis.setUserState(userName, userState);
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error('POST remove-letter error:', err);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
 });
 
 router.get('/questions/:letter', async (req, res) => {
@@ -113,7 +230,7 @@ router.post('/check/:letter', async (req, res) => {
     await discord.sendNotification(`🎉 **${userName}** ปลดล็อคตัวอักษร **${letter}** สำเร็จ! (ข้อที่ ${completed})`);
 
     if (completed >= 8) {
-      await discord.sendNotification(`🏆 **${userName}** ตามหาพี่รหัสเจอแล้ว! คำใบ้คือ **scorpiong_** 🎊`);
+      await discord.sendNotification(`🏆 **${userName}** ตามหาพี่รหัสเจอแล้ว! คำใบ้คือ **${CODENAME}** 🎊`);
     }
   }
 
@@ -163,6 +280,11 @@ router.put('/state/:userName', async (req, res) => {
     const existing = await redis.getUserState(name);
     const isNew = !existing;
     const body = { ...req.body, userName: name };
+
+    // Preserve validated slotContents from server (only /place-letter can modify it)
+    if (existing && existing.slotContents) {
+      body.slotContents = existing.slotContents;
+    }
 
     if (isNew) {
       body.clientToken = crypto.randomUUID();

@@ -1,9 +1,5 @@
-let CODENAME = '';
-let REVEALED_CHARS = new Set();
-let REVEAL_MAP = {};
-let configReady = false;
-
 let QUESTIONS = {};
+let codenameData = { slots: [], availableLetters: [] };
 
 const state = {
   userName: '',
@@ -222,20 +218,7 @@ function initDragTile(el, letter) {
 
   el.addEventListener('click', () => {
     if (el.classList.contains('used')) return;
-    const slots = document.querySelectorAll('.codename-slots .slot:not(.revealed):not(.filled)');
-    if (slots.length === 0) { showToast('ไม่มีช่องว่างเหลือแล้ว!'); return; }
-    if (slots.length === 1) {
-      const slot = slots[0];
-      const pos = parseInt(slot.dataset.pos);
-      const expected = CODENAME[pos].toLowerCase();
-      if (el.dataset.letter === expected) {
-        placeLetter(slot, el, el.dataset.letter);
-      } else {
-        selectTileForPlacement(el);
-      }
-    } else {
-      selectTileForPlacement(el);
-    }
+    selectTileForPlacement(el);
   });
 }
 
@@ -253,15 +236,7 @@ function selectTileForPlacement(tile) {
   document.querySelectorAll('.codename-slots .slot:not(.revealed):not(.filled)').forEach(slot => {
     slot.style.cursor = 'pointer';
     const handler = () => {
-      const pos = parseInt(slot.dataset.pos);
-      const expected = CODENAME[pos].toLowerCase();
-      if (selectedTile.dataset.letter === expected) {
-        placeLetter(slot, selectedTile, selectedTile.dataset.letter);
-      } else {
-        showToast('ตัวอักษรนี้ไม่ตรงกับช่องนี้!', 1200);
-        slot.classList.add('wrong');
-        setTimeout(() => slot.classList.remove('wrong'), 400);
-      }
+      placeLetter(slot, selectedTile, selectedTile.dataset.letter);
       selectedTile.style.outline = 'none';
       selectedTile = null;
       document.querySelectorAll('.codename-slots .slot:not(.revealed):not(.filled)').forEach(s => {
@@ -278,55 +253,76 @@ function handleDropOnSlot(slot, letter, sourceEl) {
     showToast('ช่องนี้ถูกวางแล้ว', 800);
     return;
   }
+  placeLetter(slot, sourceEl, letter);
+}
+
+async function placeLetter(slot, tile, letter) {
   const pos = parseInt(slot.dataset.pos);
-  const expected = CODENAME[pos].toLowerCase();
-  if (letter === expected) {
-    placeLetter(slot, sourceEl, letter);
-  } else {
-    slot.classList.add('wrong');
-    showToast('ตัวอักษรนี้ไม่ตรงกับช่องนี้!', 1000);
-    setTimeout(() => slot.classList.remove('wrong'), 400);
+  try {
+    const res = await apiFetch('/api/place-letter', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userName: state.userName,
+        clientToken: state.clientToken,
+        position: pos,
+        letter: letter
+      }),
+    });
+    if (res && res.ok) {
+      const json = await res.json();
+      if (json.success && json.correct) {
+        slot.textContent = letter.toUpperCase();
+        slot.classList.add('filled');
+        slot.dataset.letter = letter;
+        tile.classList.add('used');
+        tile.classList.remove('available');
+        state.slotContents[pos] = letter;
+        saveState();
+        showToast('✓ วางถูกต้อง!', 800);
+        renderLetterPool();
+        if (json.completed) {
+          const codename = [...document.querySelectorAll('.codename-slots .slot')].map(s => s.textContent).join('');
+          celebrationMsg.textContent = 'คุณสามารถตามหาพี่รหัสเจอแล้ว! คำใบ้คือ ' + codename;
+          celebration.classList.add('show');
+        }
+      } else {
+        slot.classList.add('wrong');
+        showToast('ตัวอักษรนี้ไม่ตรงกับช่องนี้!', 1000);
+        setTimeout(() => slot.classList.remove('wrong'), 400);
+      }
+    } else {
+      showToast('เกิดข้อผิดพลาด ลองอีกครั้ง', 1000);
+    }
+  } catch (e) {
+    showToast('เกิดข้อผิดพลาด ลองอีกครั้ง', 1000);
   }
 }
 
-function placeLetter(slot, tile, letter) {
-  slot.textContent = letter.toUpperCase();
-  slot.classList.add('filled');
-  slot.dataset.letter = letter;
-  tile.classList.add('used');
-  tile.classList.remove('available');
-  state.slotContents[slot.dataset.pos] = letter;
-  saveState();
-  showToast('✓ วางถูกต้อง!', 800);
-  checkCodenameComplete();
-}
-
-function checkCodenameComplete() {
-  const chars = CODENAME.split('');
-  const allFilled = chars.every((ch, i) => {
-    if (REVEALED_CHARS.has(ch)) return true;
-    return state.slotContents[i] !== undefined;
-  });
-  if (allFilled) {
-    celebrationMsg.textContent = 'คุณสามารถตามหาพี่รหัสเจอแล้ว! คำใบ้คือ ' + CODENAME;
-    celebration.classList.add('show');
+async function renderCodename() {
+  if (!state.userName) {
+    codenameSlots.innerHTML = '';
+    renderLetterPool();
+    return;
   }
-}
+  try {
+    const res = await apiFetch(`/api/codename/${encodeURIComponent(state.userName)}`);
+    if (res && res.ok) {
+      const json = await res.json();
+      if (json.success) codenameData = json;
+    }
+  } catch (e) {}
 
-function renderCodename() {
   codenameSlots.innerHTML = '';
-  CODENAME.split('').forEach((ch, i) => {
+  codenameData.slots.forEach((slotData) => {
     const slot = document.createElement('div');
     slot.className = 'slot';
-    slot.dataset.pos = i;
+    slot.dataset.pos = slotData.pos;
 
-    if (REVEALED_CHARS.has(ch)) {
-      slot.textContent = ch;
-      slot.classList.add('revealed');
-    } else if (state.slotContents[i] !== undefined) {
-      slot.textContent = state.slotContents[i].toUpperCase();
-      slot.classList.add('filled');
-      slot.dataset.letter = state.slotContents[i];
+    if (slotData.state === 'revealed' || slotData.state === 'filled') {
+      slot.textContent = slotData.letter.toUpperCase();
+      slot.classList.add(slotData.state);
+      if (slotData.state === 'filled') slot.dataset.letter = slotData.letter;
     } else {
       slot.textContent = '?';
     }
@@ -360,42 +356,14 @@ function renderCodename() {
 function renderLetterPool() {
   letterPool.innerHTML = '';
 
-  const chars = CODENAME.split('');
-  const needed = {};
-  chars.forEach((ch, i) => {
-    if (REVEALED_CHARS.has(ch)) return;
-    ch = ch.toLowerCase();
-    if (state.slotContents[i] !== undefined) return;
-
-    let unlocked = false;
-    for (const [alpha, positions] of Object.entries(REVEAL_MAP)) {
-      if (positions.includes(i) && state.completed[alpha]) {
-        unlocked = true;
-        break;
-      }
-    }
-    if (unlocked) {
-      needed[ch] = (needed[ch] || 0) + 1;
-    }
-  });
-
-  const placedCount = {};
-  Object.values(state.slotContents).forEach(l => {
-    placedCount[l] = (placedCount[l] || 0) + 1;
-  });
-
-  Object.entries(needed).forEach(([letter, count]) => {
-    const alreadyPlaced = placedCount[letter] || 0;
-    const toCreate = count - alreadyPlaced;
-    for (let n = 0; n < toCreate; n++) {
-      const tile = document.createElement('div');
-      tile.className = 'letter-tile available';
-      tile.textContent = letter.toUpperCase();
-      tile.dataset.letter = letter;
-      tile.dataset.uid = letter + '-' + n;
-      initDragTile(tile, letter);
-      letterPool.appendChild(tile);
-    }
+  codenameData.availableLetters.forEach((letter, idx) => {
+    const tile = document.createElement('div');
+    tile.className = 'letter-tile available';
+    tile.textContent = letter.toUpperCase();
+    tile.dataset.letter = letter;
+    tile.dataset.uid = letter + '-' + idx;
+    initDragTile(tile, letter);
+    letterPool.appendChild(tile);
   });
 }
 
@@ -579,7 +547,7 @@ async function checkQuestions() {
     delete state.failed[currentQuestionLetter];
     saveState();
     renderLetterGrid();
-    renderCodename();
+    await renderCodename();
     celebrationMsg.textContent = `คุณปลดล็อคตัวอักษร ${currentQuestionLetter} สำเร็จ!`;
     celebration.classList.add('show');
     $('q-check-btn').disabled = true;
@@ -589,7 +557,7 @@ async function checkQuestions() {
     delete state.completed[currentQuestionLetter];
     saveState();
     renderLetterGrid();
-    renderCodename();
+    await renderCodename();
     $('q-check-btn').disabled = false;
     $('q-check-btn').textContent = 'ลองใหม่';
     $('q-check-btn').onclick = resetAndRetry;
@@ -644,7 +612,6 @@ function resetQuestions() {
 }
 
 loginBtn.addEventListener('click', async () => {
-  if (!configReady) await new Promise(r => { const t = setInterval(() => { if (configReady) { clearInterval(t); r(); } }, 50); });
   const name = nameInput.value.trim().replace(/[^a-zA-Z0-9_\-\u0E00-\u0E7F]/g, '');
   if (!name) { showToast('กรุณากรอกชื่อก่อน'); return; }
 
@@ -656,6 +623,7 @@ loginBtn.addEventListener('click', async () => {
     state.completed = local.completed || {};
     state.failed = local.failed || {};
     state.slotContents = local.slotContents || {};
+    await saveState();
   } else {
     try {
       const res = await apiFetch(`/api/state/${encodeURIComponent(name)}`);
@@ -689,23 +657,23 @@ logoutBtn.addEventListener('click', async () => {
   showPage('page-login');
 });
 
-qBackBtn.addEventListener('click', () => {
+qBackBtn.addEventListener('click', async () => {
   renderLetterGrid();
-  renderCodename();
+  await renderCodename();
   showPage('page-main');
 });
 
-celebrationOk.addEventListener('click', () => {
+celebrationOk.addEventListener('click', async () => {
   celebration.classList.remove('show');
   renderLetterGrid();
-  renderCodename();
+  await renderCodename();
   showPage('page-main');
 });
 
 async function enterMain() {
   displayName.textContent = state.userName;
   $('welcome-name').textContent = 'น้อง' + state.userName;
-  renderCodename();
+  await renderCodename();
   renderLetterGrid();
   showPage('page-main');
 }
@@ -741,18 +709,6 @@ function startMatrix() {
 }
 
 async function init() {
-  try {
-    const res = await apiFetch('/api/config');
-    if (res) {
-      const json = await res.json();
-      if (json.success) {
-        CODENAME = json.codename;
-        REVEALED_CHARS = new Set(json.revealedChars);
-        REVEAL_MAP = json.revealMap;
-      }
-    }
-  } catch (e) {}
-  configReady = true;
   startMatrix();
   showPage('page-login');
 }
