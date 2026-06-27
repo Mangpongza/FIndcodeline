@@ -720,7 +720,10 @@ function startMatrix() {
     w = canvas.width = innerWidth;
     h = canvas.height = innerHeight;
     cols = Math.floor(w / 14);
-    drops = Array(cols).fill(1);
+    drops = Array.from({ length: cols }, () => ({
+      y: Math.random() * h,
+      gen: 0,
+    }));
   }
   resize();
   addEventListener('resize', resize);
@@ -731,13 +734,18 @@ function startMatrix() {
     ctx.fillStyle = '#00ff41';
     ctx.font = '13px monospace';
     for (let i = 0; i < drops.length; i++) {
+      const d = drops[i];
       const text = Math.random() > 0.5 ? '1' : '0';
-      ctx.fillText(text, i * 14, drops[i] * 14);
-      if (drops[i] * 14 > h && Math.random() > 0.975) drops[i] = 0;
-      drops[i]++;
+      ctx.fillText(text, i * 14, d.y);
+      const speed = d.gen === 0 ? 3 : 0.5;
+      d.y += speed;
+      if (d.y > h) {
+        d.y = 0;
+        d.gen++;
+      }
     }
   }
-  setInterval(draw, 120);
+  setInterval(draw, 50);
 }
 
 async function init() {
