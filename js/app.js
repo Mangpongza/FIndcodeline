@@ -645,7 +645,7 @@ function resetQuestions() {
 
 loginBtn.addEventListener('click', async () => {
   if (!configReady) await new Promise(r => { const t = setInterval(() => { if (configReady) { clearInterval(t); r(); } }, 50); });
-  const name = nameInput.value.trim();
+  const name = nameInput.value.trim().replace(/[^a-zA-Z0-9_\-\u0E00-\u0E7F]/g, '');
   if (!name) { showToast('กรุณากรอกชื่อก่อน'); return; }
 
   state.userName = name;

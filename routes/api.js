@@ -32,6 +32,10 @@ function isValidLetter(l) {
   return /^[A-Z]$/.test(l);
 }
 
+function isValidName(name) {
+  return /^[a-zA-Z0-9_\-\u0E00-\u0E7F]+$/.test(name) && name.length <= MAX_NAME_LEN;
+}
+
 async function tryConnect() {
   if (!redis.connected) {
     await redis.connect();
@@ -57,6 +61,9 @@ router.get('/questions/:letter', async (req, res) => {
   const userName = req.query.userName;
 
   if (userName) {
+    if (!isValidName(userName)) {
+      return res.status(400).json({ success: false, error: 'Invalid name' });
+    }
     if (!rateLimit(`q:${userName}`)) {
       return res.status(429).json({ success: false, error: 'Too fast' });
     }
@@ -81,8 +88,13 @@ router.post('/check/:letter', async (req, res) => {
     return res.status(404).json({ success: false, error: 'Letter not found' });
   }
   const { answers, userName } = req.body;
-  if (userName && !rateLimit(`c:${userName}`)) {
-    return res.status(429).json({ success: false, error: 'Too fast' });
+  if (userName) {
+    if (!isValidName(userName)) {
+      return res.status(400).json({ success: false, error: 'Invalid name' });
+    }
+    if (!rateLimit(`c:${userName}`)) {
+      return res.status(429).json({ success: false, error: 'Too fast' });
+    }
   }
   const results = questions.checkAnswers(letter, answers);
   if (!results) return res.status(400).json({ success: false, error: 'Invalid request' });
@@ -110,22 +122,33 @@ router.post('/check/:letter', async (req, res) => {
 
 router.get('/state/:userName', async (req, res) => {
   try {
-    if (req.params.userName.length > MAX_NAME_LEN) {
-      return res.status(400).json({ success: false, error: 'Name too long' });
+    const name = req.params.userName;
+    if (!isValidName(name)) {
+      return res.status(400).json({ success: false, error: 'Invalid name' });
     }
     await tryConnect();
-    const data = await redis.getUserState(req.params.userName);
-    res.json({ success: true, data });
+    const data = await redis.getUserState(name);
+    if (!data) {
+      return res.json({ success: true, data: null });
+    }
+    const provided = req.query.clientToken;
+    if (data.clientToken && provided !== data.clientToken) {
+      return res.status(403).json({ success: false, error: 'Forbidden' });
+    }
+    const safe = { ...data };
+    delete safe.clientToken;
+    res.json({ success: true, data: safe });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    console.error('GET state error:', err);
+    res.status(500).json({ success: false, error: 'Internal server error' });
   }
 });
 
 router.put('/state/:userName', async (req, res) => {
   try {
     const name = req.params.userName;
-    if (name.length > MAX_NAME_LEN) {
-      return res.status(400).json({ success: false, error: 'Name too long' });
+    if (!isValidName(name)) {
+      return res.status(400).json({ success: false, error: 'Invalid name' });
     }
     const contentLen = parseInt(req.headers['content-length'] || '0');
     if (contentLen > MAX_PAYLOAD) {
@@ -146,8 +169,9 @@ router.put('/state/:userName', async (req, res) => {
     } else {
       const provided = req.body.clientToken;
       if (existing.clientToken && provided !== existing.clientToken) {
-        body.clientToken = crypto.randomUUID();
+        return res.status(403).json({ success: false, error: 'Forbidden' });
       }
+      body.clientToken = existing.clientToken;
     }
 
     if (body.isLogin) {
@@ -156,15 +180,16 @@ router.put('/state/:userName', async (req, res) => {
     await redis.setUserState(name, body);
     res.json({ success: true, clientToken: body.clientToken, isNew });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    console.error('PUT state error:', err);
+    res.status(500).json({ success: false, error: 'Internal server error' });
   }
 });
 
 router.delete('/state/:userName', async (req, res) => {
   try {
     const name = req.params.userName;
-    if (name.length > MAX_NAME_LEN) {
-      return res.status(400).json({ success: false, error: 'Name too long' });
+    if (!isValidName(name)) {
+      return res.status(400).json({ success: false, error: 'Invalid name' });
     }
     await tryConnect();
     const existing = await redis.getUserState(name);
@@ -177,7 +202,8 @@ router.delete('/state/:userName', async (req, res) => {
     await redis.deleteUserState(name);
     res.json({ success: true });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    console.error('DELETE state error:', err);
+    res.status(500).json({ success: false, error: 'Internal server error' });
   }
 });
 

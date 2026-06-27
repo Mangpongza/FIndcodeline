@@ -1,7 +1,7 @@
 const https = require('https');
 require('dotenv').config();
 
-const WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL || 'https://discord.com/api/webhooks/1520009543843577907/nx4ienYvB4gBldL2Y0jjwgagizUql6cYO6cgqKd4HEWhu3hDCLl-nK5B9RkMnq8_g9DJ';
+const WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
 
 function now() {
   const d = new Date();
