@@ -109,13 +109,10 @@ router.post('/check/:letter', async (req, res) => {
     await redis.setDailyLimit(userName, getToday());
 
     const userState = await redis.getUserState(userName) || {};
-    userState.completed = userState.completed || {};
-    userState.completed[letter] = true;
-    const completedCount = Object.keys(userState.completed).length;
-    await redis.setUserState(userName, userState);
-    discord.sendNotification(`🎉 **${userName}** ปลดล็อคตัวอักษร **${letter}** สำเร็จ! (ข้อที่ ${completedCount})`);
+    const completed = Object.keys(userState.completed || {}).length + 1;
+    discord.sendNotification(`🎉 **${userName}** ปลดล็อคตัวอักษร **${letter}** สำเร็จ! (ข้อที่ ${completed})`);
 
-    if (completedCount >= 8) {
+    if (completed >= 8) {
       discord.sendNotification(`🏆 **${userName}** ตามหาพี่รหัสเจอแล้ว! คำใบ้คือ **scorpiong_** 🎊`);
     }
   }
