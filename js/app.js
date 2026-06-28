@@ -649,26 +649,25 @@ loginBtn.addEventListener('click', async () => {
   state.clientToken = getOrCreateToken(name);
 
   const local = loadLocal(name);
-  if (local) {
-    state.completed = local.completed || {};
-    state.failed = local.failed || {};
-    state.slotContents = local.slotContents || {};
-  } else {
-    try {
-      const res = await apiFetch(`/api/state/${encodeURIComponent(name)}?clientToken=${encodeURIComponent(state.clientToken)}`);
-      if (res && res.ok) {
-        const json = await res.json();
-        if (json.success && json.data) {
-          state.completed = json.data.completed || {};
-          state.failed = json.data.failed || {};
-          state.slotContents = json.data.slotContents || {};
-        }
-      } else if (res && res.status === 403) {
-        state.clientToken = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2);
-        localStorage.setItem('token_' + name, state.clientToken);
+  try {
+    const res = await apiFetch(`/api/state/${encodeURIComponent(name)}?clientToken=${encodeURIComponent(state.clientToken)}`);
+    if (res && res.ok) {
+      const json = await res.json();
+      if (json.success && json.data) {
+        state.completed = json.data.completed || {};
+        state.failed = json.data.failed || {};
+        state.slotContents = json.data.slotContents || {};
       }
-    } catch (e) {}
-    saveState(true);
+    } else if (res && res.status === 403) {
+      state.clientToken = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2);
+      localStorage.setItem('token_' + name, state.clientToken);
+    }
+  } catch (e) {}
+
+  if (local) {
+    Object.keys(local.completed || {}).forEach(k => { state.completed[k] = true; });
+    Object.keys(local.failed || {}).forEach(k => { state.failed[k] = true; });
+    Object.entries(local.slotContents || {}).forEach(([k, v]) => { if (!state.slotContents[k]) state.slotContents[k] = v; });
   }
 
   enterMain();
