@@ -108,11 +108,19 @@ router.post('/check/:letter', async (req, res) => {
     }
     await redis.setDailyLimit(userName, getToday());
 
-    const userState = await redis.getUserState(userName) || {};
-    const completed = Object.keys(userState.completed || {}).length + 1;
-    discord.sendNotification(`🎉 **${userName}** ปลดล็อคตัวอักษร **${letter}** สำเร็จ! (ข้อที่ ${completed})`);
+    let userState = await redis.getUserState(userName) || {};
+    userState.completed = userState.completed || {};
+    userState.completed[letter] = true;
+    if (!userState.clientToken) userState.clientToken = crypto.randomUUID();
+    if (!userState.failed) userState.failed = {};
+    if (!userState.slotContents) userState.slotContents = {};
+    userState.userName = userName;
+    await redis.setUserState(userName, userState);
 
-    if (completed >= 8) {
+    const completedCount = Object.keys(userState.completed).length;
+    discord.sendNotification(`🎉 **${userName}** ปลดล็อคตัวอักษร **${letter}** สำเร็จ! (ข้อที่ ${completedCount})`);
+
+    if (completedCount >= 8) {
       discord.sendNotification(`🏆 **${userName}** ตามหาพี่รหัสเจอแล้ว! คำใบ้คือ **scorpiong_** 🎊`);
     }
   }
