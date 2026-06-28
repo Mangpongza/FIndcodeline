@@ -191,14 +191,19 @@ body {
 }
 .login-box button .btn-glow {
   position: absolute;
-  inset: 0;
-  border-radius: 10px;
-  background: rgba(0,255,65,0);
-  transition: background 0.4s;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(0,255,65,0.08);
+  transform: translate(-50%, -50%);
+  transition: width 0.4s, height 0.4s;
   pointer-events: none;
 }
 .login-box button:hover .btn-glow {
-  background: rgba(0,255,65,0.08);
+  width: 300px;
+  height: 80px;
 }
 .login-box button:hover .btn-text {
   background: rgba(0,255,65,0.06);
