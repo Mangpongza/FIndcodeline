@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const crypto = require('crypto');
 const redis = require('../redis');
 const questions = require('../data/questions');
 const discord = require('../discord');
@@ -111,7 +110,6 @@ router.post('/check/:letter', async (req, res) => {
     let userState = await redis.getUserState(userName) || {};
     userState.completed = userState.completed || {};
     userState.completed[letter] = true;
-    if (!userState.clientToken) userState.clientToken = crypto.randomUUID();
     if (!userState.failed) userState.failed = {};
     if (!userState.slotContents) userState.slotContents = {};
     userState.userName = userName;
@@ -139,9 +137,7 @@ router.get('/state/:userName', async (req, res) => {
     if (!data) {
       return res.json({ success: true, data: null });
     }
-    const safe = { ...data };
-    delete safe.clientToken;
-    res.json({ success: true, data: safe });
+    res.json({ success: true, data });
   } catch (err) {
     console.error('GET state error:', err);
     res.status(500).json({ success: false, error: 'Internal server error' });
@@ -164,30 +160,13 @@ router.put('/state/:userName', async (req, res) => {
 
     await tryConnect();
 
-    const existing = await redis.getUserState(name);
-    const isNew = !existing;
     const body = { ...req.body, userName: name };
-
-    if (isNew) {
-      body.clientToken = crypto.randomUUID();
-    } else {
-      const provided = req.body.clientToken;
-      if (existing.clientToken && provided !== existing.clientToken) {
-        if (body.isLogin) {
-          body.clientToken = crypto.randomUUID();
-        } else {
-          return res.status(403).json({ success: false, error: 'Forbidden' });
-        }
-      } else {
-        body.clientToken = existing.clientToken;
-      }
-    }
 
     if (body.isLogin) {
       await discord.sendNotification(`👋 **${name}** เข้าเล่นเกมตามหาพี่รหัส!`);
     }
     await redis.setUserState(name, body);
-    res.json({ success: true, clientToken: body.clientToken, isNew });
+    res.json({ success: true });
   } catch (err) {
     console.error('PUT state error:', err);
     res.status(500).json({ success: false, error: 'Internal server error' });
@@ -201,13 +180,6 @@ router.delete('/state/:userName', async (req, res) => {
       return res.status(400).json({ success: false, error: 'Invalid name' });
     }
     await tryConnect();
-    const existing = await redis.getUserState(name);
-    if (existing && existing.clientToken) {
-      const provided = req.body?.clientToken || req.query?.clientToken;
-      if (!provided || provided !== existing.clientToken) {
-        return res.status(403).json({ success: false, error: 'Forbidden' });
-      }
-    }
     await redis.deleteUserState(name);
     res.json({ success: true });
   } catch (err) {

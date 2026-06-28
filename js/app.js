@@ -10,18 +10,7 @@ const state = {
   completed: {},
   failed: {},
   slotContents: {},
-  clientToken: '',
 };
-
-function getOrCreateToken(name) {
-  const key = 'token_' + name;
-  let t = localStorage.getItem(key);
-  if (!t) {
-    t = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2);
-    localStorage.setItem(key, t);
-  }
-  return t;
-}
 
 const $ = id => document.getElementById(id);
 const pageLogin = $('page-login');
@@ -81,7 +70,6 @@ async function saveState(isLogin) {
     completed: state.completed,
     failed: state.failed,
     slotContents: state.slotContents,
-    clientToken: state.clientToken,
     isLogin: !!isLogin,
   };
   try {
@@ -92,10 +80,6 @@ async function saveState(isLogin) {
     });
     if (res && res.ok) {
       const json = await res.json();
-      if (json.clientToken) {
-        state.clientToken = json.clientToken;
-        localStorage.setItem('token_' + state.userName, json.clientToken);
-      }
     }
   } catch (e) {
     console.warn('saveState error:', e);
@@ -646,11 +630,10 @@ loginBtn.addEventListener('click', async () => {
   if (!name) { showToast('กรุณากรอกชื่อก่อน'); return; }
 
   state.userName = name;
-  state.clientToken = getOrCreateToken(name);
 
   const local = loadLocal(name);
   try {
-    const res = await apiFetch(`/api/state/${encodeURIComponent(name)}?clientToken=${encodeURIComponent(state.clientToken)}`);
+    const res = await apiFetch(`/api/state/${encodeURIComponent(name)}`);
     if (res && res.ok) {
       const json = await res.json();
       if (json.success && json.data) {
@@ -658,9 +641,6 @@ loginBtn.addEventListener('click', async () => {
         state.failed = json.data.failed || {};
         state.slotContents = json.data.slotContents || {};
       }
-    } else if (res && res.status === 403) {
-      state.clientToken = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2);
-      localStorage.setItem('token_' + name, state.clientToken);
     }
   } catch (e) {}
 
