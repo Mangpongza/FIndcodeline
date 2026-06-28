@@ -18,16 +18,7 @@
 - **Hosting:** Vercel (Serverless Functions)
 - **Notification:** Discord Webhook
 
-## Environment Variables
-
-```env
-REDIS_URL="redis://default:<password>@<host>:<port>"
-DISCORD_WEBHOOK_URL="https://discord.com/api/webhooks/<id>/<token>"
-PORT=3000
-```
-
 ## Development
-
 ```bash
 npm install
 npm run dev
