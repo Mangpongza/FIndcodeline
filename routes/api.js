@@ -105,7 +105,6 @@ router.post('/check/:letter', async (req, res) => {
     globalState.completed[letter] = true;
     if (!globalState.failed) globalState.failed = {};
     if (!globalState.slotContents) globalState.slotContents = {};
-    globalState.userName = userName || 'unknown';
     await redis.setGlobalState(globalState);
 
     const completedCount = Object.keys(globalState.completed).length;
