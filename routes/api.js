@@ -91,6 +91,8 @@ router.post('/check/:letter', async (req, res) => {
   const results = questions.checkAnswers(letter, answers);
   if (!results) return res.status(400).json({ success: false, error: 'Invalid request' });
 
+  await tryConnect();
+
   const allCorrect = results.every(r => r);
 
   if (allCorrect) {
