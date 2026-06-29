@@ -38,10 +38,8 @@ function apiFetch(url, options) {
 }
 
 function saveLocal() {
-  if (!state.userName) return;
   try {
-    localStorage.setItem('game_' + state.userName, JSON.stringify({
-      userName: state.userName,
+    localStorage.setItem('global_session', JSON.stringify({
       completed: state.completed,
       failed: state.failed,
       slotContents: state.slotContents,
@@ -49,21 +47,15 @@ function saveLocal() {
   } catch (e) {}
 }
 
-function loadLocal(userName) {
+function loadLocal() {
   try {
-    const raw = localStorage.getItem('game_' + userName);
+    const raw = localStorage.getItem('global_session');
     if (raw) return JSON.parse(raw);
   } catch (e) {}
   return null;
 }
 
-function removeLocal() {
-  if (!state.userName) return;
-  try { localStorage.removeItem('game_' + state.userName); } catch (e) {}
-}
-
 async function saveState(isLogin) {
-  if (!state.userName) return;
   saveLocal();
   const data = {
     userName: state.userName,
@@ -73,7 +65,7 @@ async function saveState(isLogin) {
     isLogin: !!isLogin,
   };
   try {
-    const res = await apiFetch(`/api/state/${encodeURIComponent(state.userName)}`, {
+    const res = await apiFetch('/api/state', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -86,34 +78,28 @@ async function saveState(isLogin) {
   }
 }
 
-async function loadState(userName) {
-  const local = loadLocal(userName);
+async function loadState() {
+  const local = loadLocal();
   if (local) {
-    state.userName = local.userName || userName;
     state.completed = local.completed || {};
     state.failed = local.failed || {};
     state.slotContents = local.slotContents || {};
-    return true;
   }
   try {
-    const res = await apiFetch(`/api/state/${encodeURIComponent(userName)}`);
-    if (!res) return false;
+    const res = await apiFetch('/api/state');
+    if (!res) return;
     const json = await res.json();
     if (json.success && json.data) {
-      state.userName = json.data.userName || userName;
       state.completed = json.data.completed || {};
       state.failed = json.data.failed || {};
       state.slotContents = json.data.slotContents || {};
-      return true;
     }
-    return false;
   } catch (e) {
     console.warn('loadState error:', e);
-    return false;
   }
 }
 
-async function clearState() {
+function clearState() {
   state.userName = '';
   state.completed = {};
   state.failed = {};
@@ -415,7 +401,7 @@ let currentSubmitted = {};
 let currentCorrect = {};
 
 async function openQuestionPage(letter) {
-  const res = await apiFetch(`/api/questions/${letter}?userName=${encodeURIComponent(state.userName)}`);
+  const res = await apiFetch(`/api/questions/${letter}`);
   if (!res || !res.ok) {
     showToast('ยังไม่มีโจทย์สำหรับตัวอักษรนี้', 1500);
     return;
@@ -630,26 +616,7 @@ loginBtn.addEventListener('click', async () => {
   if (!name) { showToast('กรุณากรอกชื่อก่อน'); return; }
 
   state.userName = name;
-
-  const local = loadLocal(name);
-  try {
-    const res = await apiFetch(`/api/state/${encodeURIComponent(name)}`);
-    if (res && res.ok) {
-      const json = await res.json();
-      if (json.success && json.data) {
-        state.completed = json.data.completed || {};
-        state.failed = json.data.failed || {};
-        state.slotContents = json.data.slotContents || {};
-      }
-    }
-  } catch (e) {}
-
-  if (local) {
-    Object.keys(local.completed || {}).forEach(k => { state.completed[k] = true; });
-    Object.keys(local.failed || {}).forEach(k => { state.failed[k] = true; });
-    Object.entries(local.slotContents || {}).forEach(([k, v]) => { if (!state.slotContents[k]) state.slotContents[k] = v; });
-  }
-
+  await loadState();
   enterMain();
   saveState(true);
 });
@@ -658,8 +625,8 @@ nameInput.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') loginBtn.click();
 });
 
-logoutBtn.addEventListener('click', async () => {
-  await clearState();
+logoutBtn.addEventListener('click', () => {
+  clearState();
   nameInput.value = '';
   showPage('page-login');
 });
