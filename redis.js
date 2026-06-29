@@ -77,27 +77,23 @@ function isRedisAvailable() {
 }
 
 async function getGlobalState() {
-  if (isRedisAvailable()) {
-    try {
-      const data = await redis.get('global:state');
-      if (data !== null) return JSON.parse(data);
-    } catch (err) {}
+  if (!isRedisAvailable()) return null;
+  try {
+    const data = await redis.get('global:state');
+    return data ? JSON.parse(data) : null;
+  } catch (err) {
+    return null;
   }
-  const mem = memGet('global:state');
-  return mem ? JSON.parse(mem) : null;
 }
 
 async function setGlobalState(state) {
-  const str = JSON.stringify(state);
-  if (isRedisAvailable()) {
-    try {
-      await redis.set('global:state', str, 'EX', 86400 * 30);
-      memSet('global:state', str, 86400 * 30 * 1000);
-      return true;
-    } catch (err) {}
+  if (!isRedisAvailable()) return false;
+  try {
+    await redis.set('global:state', JSON.stringify(state), 'EX', 86400 * 30);
+    return true;
+  } catch (err) {
+    return false;
   }
-  memSet('global:state', str, 86400 * 30 * 1000);
-  return true;
 }
 
 async function getGlobalDailyLimit() {
