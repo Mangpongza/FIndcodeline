@@ -479,6 +479,29 @@ body {
   margin: 0 3px;
 }
 
+.description-box {
+  background: rgba(0,255,65,0.04);
+  border: 1px solid rgba(0,255,65,0.15);
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-family: 'Noto Sans Thai', sans-serif;
+  box-shadow: 0 0 10px rgba(0,255,65,0.03), inset 0 0 10px rgba(0,255,65,0.02);
+}
+.description-box .desc-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.description-box .desc-text {
+  font-size: 14px;
+  color: rgba(197,200,198,0.85);
+  line-height: 1.7;
+}
+
 .letter-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
