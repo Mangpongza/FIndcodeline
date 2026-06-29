@@ -97,7 +97,10 @@ async function loadState() {
         applyState(json.data);
         saveLocal();
       } else {
-        clearState();
+        state.completed = {};
+        state.failed = {};
+        state.slotContents = {};
+        try { localStorage.removeItem('game_state'); } catch (e) {}
       }
     }
   } catch (e) {
