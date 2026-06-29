@@ -51,64 +51,47 @@ async function connect() {
   }
 }
 
-async function getUserState(userName) {
+async function getGlobalState() {
   const client = getClient();
   if (!client || !connected) return null;
   try {
-    const key = `user:${userName}`;
-    const data = await client.get(key);
+    const data = await client.get('global:state');
     return data ? JSON.parse(data) : null;
   } catch (err) {
-    console.error('Redis get error:', err.message);
     return null;
   }
 }
 
-async function setUserState(userName, state) {
+async function setGlobalState(state) {
   const client = getClient();
   if (!client || !connected) return false;
   try {
-    const key = `user:${userName}`;
-    await client.set(key, JSON.stringify(state), 'EX', 86400 * 30);
+    await client.set('global:state', JSON.stringify(state), 'EX', 86400 * 30);
     return true;
   } catch (err) {
-    console.error('Redis set error:', err.message);
     return false;
   }
 }
 
-async function deleteUserState(userName) {
-  const client = getClient();
-  if (!client || !connected) return false;
-  try {
-    const key = `user:${userName}`;
-    await client.del(key);
-    return true;
-  } catch (err) {
-    console.error('Redis del error:', err.message);
-    return false;
-  }
-}
-
-async function getDailyLimit(userName) {
+async function getGlobalDailyLimit() {
   const client = getClient();
   if (!client || !connected) return null;
   try {
-    return await client.get(`daily:${userName}`);
+    return await client.get('global:daily');
   } catch (err) {
     return null;
   }
 }
 
-async function setDailyLimit(userName, date) {
+async function setGlobalDailyLimit(date) {
   const client = getClient();
   if (!client || !connected) return false;
   try {
-    await client.set(`daily:${userName}`, date, 'EX', 86400 * 2);
+    await client.set('global:daily', date, 'EX', 86400 * 2);
     return true;
   } catch (err) {
     return false;
   }
 }
 
-module.exports = { connect, getUserState, setUserState, deleteUserState, getDailyLimit, setDailyLimit };
+module.exports = { connect, getGlobalState, setGlobalState, getGlobalDailyLimit, setGlobalDailyLimit };

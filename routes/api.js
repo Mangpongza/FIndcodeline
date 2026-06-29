@@ -57,19 +57,12 @@ router.get('/questions/:letter', async (req, res) => {
   if (!isValidLetter(letter)) {
     return res.status(404).json({ success: false, error: 'Letter not found' });
   }
-  const userName = req.query.userName;
-
-  if (userName) {
-    if (!isValidName(userName)) {
-      return res.status(400).json({ success: false, error: 'Invalid name' });
-    }
-    if (!rateLimit(`q:${userName}`)) {
-      return res.status(429).json({ success: false, error: 'Too fast' });
-    }
-    const dailyDate = await redis.getDailyLimit(userName);
-    if (dailyDate === getToday()) {
-      return res.json({ success: false, error: 'วันนี้น้องทำโจทย์ครบ 1 ข้อแล้ว กลับมาทำใหม่พรุ่งนี้!', dailyLimit: true });
-    }
+  if (!rateLimit('q:global')) {
+    return res.status(429).json({ success: false, error: 'Too fast' });
+  }
+  const dailyDate = await redis.getGlobalDailyLimit();
+  if (dailyDate === getToday()) {
+    return res.json({ success: false, error: 'วันนี้ทำโจทย์ครบ 1 ข้อแล้ว กลับมาทำใหม่พรุ่งนี้!', dailyLimit: true });
   }
 
   const qs = questions.getQuestions(letter);
@@ -100,40 +93,37 @@ router.post('/check/:letter', async (req, res) => {
 
   const allCorrect = results.every(r => r);
 
-  if (allCorrect && userName) {
-    const dailyDate = await redis.getDailyLimit(userName);
+  if (allCorrect) {
+    const dailyDate = await redis.getGlobalDailyLimit();
     if (dailyDate === getToday()) {
-      return res.json({ success: false, error: 'วันนี้คุณทำโจทย์ครบ 1 ข้อแล้ว กลับมาทำใหม่พรุ่งนี้!', dailyLimit: true });
+      return res.json({ success: false, error: 'วันนี้ทำโจทย์ครบ 1 ข้อแล้ว กลับมาทำใหม่พรุ่งนี้!', dailyLimit: true });
     }
-    await redis.setDailyLimit(userName, getToday());
+    await redis.setGlobalDailyLimit(getToday());
 
-    let userState = await redis.getUserState(userName) || {};
-    userState.completed = userState.completed || {};
-    userState.completed[letter] = true;
-    if (!userState.failed) userState.failed = {};
-    if (!userState.slotContents) userState.slotContents = {};
-    userState.userName = userName;
-    await redis.setUserState(userName, userState);
+    let globalState = await redis.getGlobalState() || {};
+    globalState.completed = globalState.completed || {};
+    globalState.completed[letter] = true;
+    if (!globalState.failed) globalState.failed = {};
+    if (!globalState.slotContents) globalState.slotContents = {};
+    globalState.userName = userName || 'unknown';
+    await redis.setGlobalState(globalState);
 
-    const completedCount = Object.keys(userState.completed).length;
-    discord.sendNotification(`🎉 **${userName}** ปลดล็อคตัวอักษร **${letter}** สำเร็จ! (ข้อที่ ${completedCount})`);
+    const completedCount = Object.keys(globalState.completed).length;
+    const displayName = userName || 'Someone';
+    discord.sendNotification(`🎉 **${displayName}** ปลดล็อคตัวอักษร **${letter}** สำเร็จ! (ข้อที่ ${completedCount})`);
 
     if (completedCount >= 8) {
-      discord.sendNotification(`🏆 **${userName}** ตามหาพี่รหัสเจอแล้ว! คำใบ้คือ **scorpiong_** 🎊`);
+      discord.sendNotification(`🏆 **${displayName}** ตามหาพี่รหัสเจอแล้ว! คำใบ้คือ **scorpiong_** 🎊`);
     }
   }
 
   res.json({ success: true, results });
 });
 
-router.get('/state/:userName', async (req, res) => {
+router.get('/state', async (req, res) => {
   try {
-    const name = req.params.userName;
-    if (!isValidName(name)) {
-      return res.status(400).json({ success: false, error: 'Invalid name' });
-    }
     await tryConnect();
-    const data = await redis.getUserState(name);
+    const data = await redis.getGlobalState();
     if (!data) {
       return res.json({ success: true, data: null });
     }
@@ -144,46 +134,28 @@ router.get('/state/:userName', async (req, res) => {
   }
 });
 
-router.put('/state/:userName', async (req, res) => {
+router.put('/state', async (req, res) => {
   try {
-    const name = req.params.userName;
-    if (!isValidName(name)) {
-      return res.status(400).json({ success: false, error: 'Invalid name' });
-    }
     const contentLen = parseInt(req.headers['content-length'] || '0');
     if (contentLen > MAX_PAYLOAD) {
       return res.status(413).json({ success: false, error: 'Payload too large' });
     }
-    if (!rateLimit(`s:${name}`)) {
+    if (!rateLimit(`s:global`)) {
       return res.status(429).json({ success: false, error: 'Too fast' });
     }
 
     await tryConnect();
 
-    const body = { ...req.body, userName: name };
+    const body = { ...req.body };
 
-    if (body.isLogin) {
-      await discord.sendNotification(`👋 **${name}** เข้าเล่นเกมตามหาพี่รหัส!`);
+    if (body.isLogin && body.userName) {
+      await discord.sendNotification(`👋 **${body.userName}** เข้าเล่นเกมตามหาพี่รหัส!`);
     }
-    await redis.setUserState(name, body);
+    delete body.isLogin;
+    await redis.setGlobalState(body);
     res.json({ success: true });
   } catch (err) {
     console.error('PUT state error:', err);
-    res.status(500).json({ success: false, error: 'Internal server error' });
-  }
-});
-
-router.delete('/state/:userName', async (req, res) => {
-  try {
-    const name = req.params.userName;
-    if (!isValidName(name)) {
-      return res.status(400).json({ success: false, error: 'Invalid name' });
-    }
-    await tryConnect();
-    await redis.deleteUserState(name);
-    res.json({ success: true });
-  } catch (err) {
-    console.error('DELETE state error:', err);
     res.status(500).json({ success: false, error: 'Internal server error' });
   }
 });
