@@ -65,6 +65,7 @@ function applyState(data) {
 async function saveState(isLogin) {
   saveLocal();
   const data = {
+    userName: state.userName,
     completed: state.completed,
     failed: state.failed,
     slotContents: state.slotContents,

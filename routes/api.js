@@ -153,6 +153,7 @@ router.put('/state', async (req, res) => {
       await discord.sendNotification(`👋 **${body.userName}** เข้าเล่นเกมตามหาพี่รหัส!`);
     }
     delete body.isLogin;
+    delete body.userName;
     await redis.setGlobalState(body);
     res.json({ success: true });
   } catch (err) {

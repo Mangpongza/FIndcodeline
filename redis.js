@@ -22,6 +22,7 @@ function getClient() {
       return Math.min(times * 200, 2000);
     },
     lazyConnect: true,
+    tls: url.startsWith('rediss://') ? {} : undefined,
   });
 
   redis.on('connect', () => {
@@ -99,8 +100,7 @@ async function setGlobalState(state) {
 async function getGlobalDailyLimit() {
   if (isRedisAvailable()) {
     try {
-      const data = await redis.get('global:daily');
-      if (data !== null) return data;
+      return await redis.get('global:daily');
     } catch (err) {}
   }
   return memGet('global:daily');
