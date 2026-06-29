@@ -3,6 +3,9 @@ const Redis = require('ioredis');
 let redis = null;
 let connected = false;
 
+const memStore = new Map();
+const memTimers = new Map();
+
 function getClient() {
   if (redis) return redis;
 
@@ -38,6 +41,24 @@ function getClient() {
   return redis;
 }
 
+const MAX_TTL = 2147483647;
+
+function memSet(key, value, ttlMs) {
+  memStore.set(key, value);
+  const existing = memTimers.get(key);
+  if (existing) clearTimeout(existing);
+  if (ttlMs > 0) {
+    memTimers.set(key, setTimeout(() => {
+      memStore.delete(key);
+      memTimers.delete(key);
+    }, Math.min(ttlMs, MAX_TTL)));
+  }
+}
+
+function memGet(key) {
+  return memStore.get(key) ?? null;
+}
+
 async function connect() {
   const client = getClient();
   if (!client) return false;
@@ -51,47 +72,54 @@ async function connect() {
   }
 }
 
+function isRedisAvailable() {
+  return redis !== null && connected;
+}
+
 async function getGlobalState() {
-  const client = getClient();
-  if (!client || !connected) return null;
-  try {
-    const data = await client.get('global:state');
-    return data ? JSON.parse(data) : null;
-  } catch (err) {
-    return null;
+  if (isRedisAvailable()) {
+    try {
+      const data = await redis.get('global:state');
+      if (data !== null) return JSON.parse(data);
+    } catch (err) {}
   }
+  const mem = memGet('global:state');
+  return mem ? JSON.parse(mem) : null;
 }
 
 async function setGlobalState(state) {
-  const client = getClient();
-  if (!client || !connected) return false;
-  try {
-    await client.set('global:state', JSON.stringify(state), 'EX', 86400 * 30);
-    return true;
-  } catch (err) {
-    return false;
+  const str = JSON.stringify(state);
+  if (isRedisAvailable()) {
+    try {
+      await redis.set('global:state', str, 'EX', 86400 * 30);
+      memSet('global:state', str, 86400 * 30 * 1000);
+      return true;
+    } catch (err) {}
   }
+  memSet('global:state', str, 86400 * 30 * 1000);
+  return true;
 }
 
 async function getGlobalDailyLimit() {
-  const client = getClient();
-  if (!client || !connected) return null;
-  try {
-    return await client.get('global:daily');
-  } catch (err) {
-    return null;
+  if (isRedisAvailable()) {
+    try {
+      const data = await redis.get('global:daily');
+      if (data !== null) return data;
+    } catch (err) {}
   }
+  return memGet('global:daily');
 }
 
 async function setGlobalDailyLimit(date) {
-  const client = getClient();
-  if (!client || !connected) return false;
-  try {
-    await client.set('global:daily', date, 'EX', 86400 * 2);
-    return true;
-  } catch (err) {
-    return false;
+  if (isRedisAvailable()) {
+    try {
+      await redis.set('global:daily', date, 'EX', 86400 * 2);
+      memSet('global:daily', date, 86400 * 2 * 1000);
+      return true;
+    } catch (err) {}
   }
+  memSet('global:daily', date, 86400 * 2 * 1000);
+  return true;
 }
 
 module.exports = { connect, getGlobalState, setGlobalState, getGlobalDailyLimit, setGlobalDailyLimit };
