@@ -37,26 +37,7 @@ function apiFetch(url, options) {
   return fetch(url, { ...options, signal: controller.signal }).finally(() => clearTimeout(timer));
 }
 
-function saveLocal() {
-  try {
-    localStorage.setItem('global_session', JSON.stringify({
-      completed: state.completed,
-      failed: state.failed,
-      slotContents: state.slotContents,
-    }));
-  } catch (e) {}
-}
-
-function loadLocal() {
-  try {
-    const raw = localStorage.getItem('global_session');
-    if (raw) return JSON.parse(raw);
-  } catch (e) {}
-  return null;
-}
-
 async function saveState(isLogin) {
-  saveLocal();
   const data = {
     completed: state.completed,
     failed: state.failed,
@@ -78,12 +59,6 @@ async function saveState(isLogin) {
 }
 
 async function loadState() {
-  const local = loadLocal();
-  if (local) {
-    state.completed = local.completed || {};
-    state.failed = local.failed || {};
-    state.slotContents = local.slotContents || {};
-  }
   try {
     const res = await apiFetch('/api/state');
     if (!res) return;
