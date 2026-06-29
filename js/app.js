@@ -37,7 +37,33 @@ function apiFetch(url, options) {
   return fetch(url, { ...options, signal: controller.signal }).finally(() => clearTimeout(timer));
 }
 
+function saveLocal() {
+  try {
+    localStorage.setItem('game_state', JSON.stringify({
+      completed: state.completed,
+      failed: state.failed,
+      slotContents: state.slotContents,
+    }));
+  } catch (e) {}
+}
+
+function loadLocal() {
+  try {
+    const raw = localStorage.getItem('game_state');
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function applyState(data) {
+  state.completed = data.completed || {};
+  state.failed = data.failed || {};
+  state.slotContents = data.slotContents || {};
+}
+
 async function saveState(isLogin) {
+  saveLocal();
   const data = {
     completed: state.completed,
     failed: state.failed,
@@ -59,14 +85,20 @@ async function saveState(isLogin) {
 }
 
 async function loadState() {
+  const local = loadLocal();
+  if (local) applyState(local);
+
   try {
     const res = await apiFetch('/api/state');
     if (!res) return;
     const json = await res.json();
-    if (json.success && json.data) {
-      state.completed = json.data.completed || {};
-      state.failed = json.data.failed || {};
-      state.slotContents = json.data.slotContents || {};
+    if (json.success) {
+      if (json.data) {
+        applyState(json.data);
+        saveLocal();
+      } else {
+        clearState();
+      }
     }
   } catch (e) {
     console.warn('loadState error:', e);
@@ -78,6 +110,7 @@ function clearState() {
   state.completed = {};
   state.failed = {};
   state.slotContents = {};
+  try { localStorage.removeItem('game_state'); } catch (e) {}
 }
 
 function showPage(pageId) {
