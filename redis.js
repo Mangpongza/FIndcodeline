@@ -118,4 +118,19 @@ async function setGlobalDailyLimit(date) {
   return true;
 }
 
-module.exports = { connect, getGlobalState, setGlobalState, getGlobalDailyLimit, setGlobalDailyLimit };
+async function clearAll() {
+  if (isRedisAvailable()) {
+    try {
+      await redis.del('global:state');
+      await redis.del('global:daily');
+      return true;
+    } catch (err) {
+      console.error('Redis clear error:', err);
+      return false;
+    }
+  }
+  memStore.clear();
+  return true;
+}
+
+module.exports = { connect, getGlobalState, setGlobalState, getGlobalDailyLimit, setGlobalDailyLimit, clearAll };
