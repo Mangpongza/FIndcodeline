@@ -383,14 +383,15 @@ function renderLetterGrid() {
 
     const completed = state.completed[letter];
     const failed = state.failed[letter];
+    const inCodename = REVEAL_MAP[letter] !== undefined;
 
-    if (completed) {
+    if (completed && inCodename) {
       btn.classList.add('completed');
       const mark = document.createElement('span');
       mark.className = 'check-mark';
       mark.textContent = '✓';
       btn.appendChild(mark);
-    } else if (failed) {
+    } else if (failed || (completed && !inCodename)) {
       btn.classList.add('failed');
       const mark = document.createElement('span');
       mark.className = 'check-mark';
